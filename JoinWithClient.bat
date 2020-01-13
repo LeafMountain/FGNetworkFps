@@ -1,0 +1,1 @@
+"%PROGRAMFILES%\Epic Games\UE_4.24\Engine\Binaries\Win64\UE4Editor.exe" "%CD%\FGnetworkProj.uproject" 10.20.3.172 -game -ResX=800 -ResY=900 -WinX=0 -WinY=20 -log -nosteam
