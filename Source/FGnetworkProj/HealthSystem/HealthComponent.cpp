@@ -71,3 +71,8 @@ void UHealthComponent::ServerLowerHealth_Implementation(float Value)
 		LowerHealth(Value);
 	}
 }
+
+void UHealthComponent::TakeDamage(float Value)
+{
+	LowerHealth(Value);
+}
