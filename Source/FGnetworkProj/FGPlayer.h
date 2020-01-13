@@ -10,6 +10,8 @@ class UStaticMeshComponent;
 class UCapsuleComponent;
 class UCameraComponent;
 
+#define GETENUMSTRING(etype, evalue) ( (FindObject<UEnum>(ANY_PACKAGE, TEXT(etype), true) != nullptr) ? FindObject<UEnum>(ANY_PACKAGE, TEXT(etype), true)->GetEnumName((int32)evalue) : FString("Invalid - are you sure enum uses UENUM() macro?") )
+
 UCLASS()
 class FGNETWORKPROJ_API AFGPlayer : public ACharacter
 {
@@ -26,7 +28,13 @@ public:
 	float BaseLookUpRate;
 
 protected:
-	// Called when the game starts or when spawned
+
+	UFUNCTION(Server, Reliable)
+		void Server_UpdatePositionAndRotation(FRotator Rotation, FVector Location);
+
+	UFUNCTION(NetMulticast, Reliable)
+		void Multicast_UpdatePositionAndRotation(FRotator Rotation, FVector Location);
+
 	virtual void BeginPlay() override;
 
 	UPROPERTY(VisibleDefaultsOnly, Category = Mesh)

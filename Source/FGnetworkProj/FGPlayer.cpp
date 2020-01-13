@@ -15,12 +15,13 @@ AFGPlayer::AFGPlayer()
 	BaseLookUpRate = 45.f;
  	
 	PrimaryActorTick.bCanEverTick = true;
+	bReplicates = true;
 
 	RootComponent = GetCapsuleComponent();
 
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	CameraComponent->SetupAttachment(GetCapsuleComponent());
-	//CameraComponent->bUsePawnControlRotation = true;
+	CameraComponent->bUsePawnControlRotation = true;
 
 	Body = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Body"));
 	Body->SetupAttachment(GetCapsuleComponent());
@@ -40,6 +41,18 @@ void AFGPlayer::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	if (Role == ROLE_Authority || Role == ROLE_AutonomousProxy)
+	{
+		if (Role == ROLE_Authority)
+		{
+			Multicast_UpdatePositionAndRotation(GetActorRotation(), GetActorLocation());
+		}
+		else
+		{
+			Server_UpdatePositionAndRotation(GetActorRotation(), GetActorLocation());
+		}
+	}
+
 }
 
 // Called to bind functionality to input
@@ -50,6 +63,8 @@ void AFGPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
 
+	PlayerInputComponent->BindAxis("MoveForward", this, &AFGPlayer::MoveForward);
+	PlayerInputComponent->BindAxis("MoveRight", this, &AFGPlayer::MoveRight);
 
 	PlayerInputComponent->BindAxis("Turn", this, &APawn::AddControllerYawInput);
 	PlayerInputComponent->BindAxis("TurnRate", this, &AFGPlayer::TurnAtRate);
@@ -66,6 +81,7 @@ void AFGPlayer::MoveForward(float Val)
 {
 	if (Val != 0.0f)
 	{
+		GEngine->AddOnScreenDebugMessage(-2, 5, FColor::Red, FString::Printf(TEXT("%s"), *GETENUMSTRING("ENetRole", Role)));
 		AddMovementInput(GetActorForwardVector(), Val);
 	}
 }
@@ -80,7 +96,6 @@ void AFGPlayer::MoveRight(float Val)
 
 void AFGPlayer::TurnAtRate(float Rate)
 {
-	GEngine->AddOnScreenDebugMessage(-2, 5, FColor::Red, TEXT("helo u turned"));
 	AddControllerYawInput(Rate * BaseTurnRate * GetWorld()->GetDeltaSeconds());
 }
 
@@ -89,3 +104,16 @@ void AFGPlayer::LookUpAtRate(float Rate)
 	AddControllerPitchInput(Rate * BaseLookUpRate * GetWorld()->GetDeltaSeconds());
 }
 
+void AFGPlayer::Server_UpdatePositionAndRotation_Implementation(FRotator Rotation, FVector Location)
+{
+	Multicast_UpdatePositionAndRotation(Rotation, Location);
+}
+
+void AFGPlayer::Multicast_UpdatePositionAndRotation_Implementation(FRotator Rotation, FVector Location)
+{
+	if (Role == ROLE_Authority || Role == ROLE_SimulatedProxy)
+	{
+		SetActorRotation(Rotation);
+		SetActorLocation(Location);
+	}
+}
