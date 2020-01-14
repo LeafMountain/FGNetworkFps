@@ -18,6 +18,8 @@ void URespawnComponent::RespawnPlayer(AActor* Player)
 	if (PlayerHealth != nullptr && SpawnPoints.Num() > 0)
 	{
 		PlayerHealth->ResetHealth();
-		Player->SetActorLocation(SpawnPoints[FMath::RandRange(0, SpawnPoints.Num() - 1)]->GetActorLocation());
+		int32 SpawnPointIndex = FMath::RandRange(0, SpawnPoints.Num() - 1);
+		Player->SetActorLocation(SpawnPoints[SpawnPointIndex]->GetActorLocation());
+		Player->SetActorRotation(SpawnPoints[SpawnPointIndex]->GetActorRotation());
 	}
 }
