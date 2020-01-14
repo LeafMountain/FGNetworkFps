@@ -27,13 +27,16 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
 	float BaseLookUpRate;
 
+	UPROPERTY(EditDefaultsOnly, Category = Replication)
+	float InterpSpeed = 3.5f;
+
 protected:
 
 	UFUNCTION(Server, Reliable)
-		void Server_UpdatePositionAndRotation(FRotator Rotation, FVector Location);
+	void Server_UpdatePositionAndRotation(FRotator Rotation, FVector Location, float DeltaTime);
 
 	UFUNCTION(NetMulticast, Reliable)
-		void Multicast_UpdatePositionAndRotation(FRotator Rotation, FVector Location);
+	void Multicast_UpdatePositionAndRotation(FRotator Rotation, FVector Location, float DeltaTime);
 
 	virtual void BeginPlay() override;
 
@@ -52,8 +55,6 @@ public:
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
-	void Jump();
 
 	void MoveForward(float val);
 

@@ -14,8 +14,8 @@ AFGPlayer::AFGPlayer()
 	BaseTurnRate = 45.f;
 	BaseLookUpRate = 45.f;
  	
-	PrimaryActorTick.bCanEverTick = true;
 	bReplicates = true;
+	PrimaryActorTick.bCanEverTick = true;
 
 	RootComponent = GetCapsuleComponent();
 
@@ -45,14 +45,13 @@ void AFGPlayer::Tick(float DeltaTime)
 	{
 		if (Role == ROLE_Authority)
 		{
-			Multicast_UpdatePositionAndRotation(GetActorRotation(), GetActorLocation());
+			Multicast_UpdatePositionAndRotation(GetActorRotation(), GetActorLocation(), DeltaTime);
 		}
 		else
 		{
-			Server_UpdatePositionAndRotation(GetActorRotation(), GetActorLocation());
+			Server_UpdatePositionAndRotation(GetActorRotation(), GetActorLocation(),DeltaTime);
 		}
 	}
-
 }
 
 // Called to bind functionality to input
@@ -72,16 +71,11 @@ void AFGPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	PlayerInputComponent->BindAxis("LookUpRate", this, &AFGPlayer::LookUpAtRate);
 }
 
-void AFGPlayer::Jump()
-{
-
-}
-
 void AFGPlayer::MoveForward(float Val)
 {
 	if (Val != 0.0f)
 	{
-		GEngine->AddOnScreenDebugMessage(-2, 5, FColor::Red, FString::Printf(TEXT("%s"), *GETENUMSTRING("ENetRole", Role)));
+		//GEngine->AddOnScreenDebugMessage(-2, 5, FColor::Red, FString::Printf(TEXT("%s"), *GETENUMSTRING("ENetRole", Role)));
 		AddMovementInput(GetActorForwardVector(), Val);
 	}
 }
@@ -104,16 +98,16 @@ void AFGPlayer::LookUpAtRate(float Rate)
 	AddControllerPitchInput(Rate * BaseLookUpRate * GetWorld()->GetDeltaSeconds());
 }
 
-void AFGPlayer::Server_UpdatePositionAndRotation_Implementation(FRotator Rotation, FVector Location)
+void AFGPlayer::Server_UpdatePositionAndRotation_Implementation(FRotator Rotation, FVector Location, float DeltaTime)
 {
-	Multicast_UpdatePositionAndRotation(Rotation, Location);
+	Multicast_UpdatePositionAndRotation(Rotation, Location, DeltaTime);
 }
 
-void AFGPlayer::Multicast_UpdatePositionAndRotation_Implementation(FRotator Rotation, FVector Location)
+void AFGPlayer::Multicast_UpdatePositionAndRotation_Implementation(FRotator Rotation, FVector Location, float DeltaTime)
 {
 	if (Role == ROLE_Authority || Role == ROLE_SimulatedProxy)
 	{
-		SetActorRotation(Rotation);
-		SetActorLocation(Location);
+		SetActorRotation(FMath::RInterpTo(GetActorRotation(), Rotation, DeltaTime, InterpSpeed));
+		SetActorLocation(FMath::VInterpTo(GetActorLocation(), Location, DeltaTime, InterpSpeed));
 	}
 }
