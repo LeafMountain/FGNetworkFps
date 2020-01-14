@@ -15,12 +15,9 @@ void URespawnComponent::RespawnPlayer(AActor* Player)
 {
 	UHealthComponent* PlayerHealth = Cast<UHealthComponent>(Player->FindComponentByClass(UHealthComponent::StaticClass()));
 
-	if (PlayerHealth != nullptr)
+	if (PlayerHealth != nullptr && SpawnPoints.Num() > 0)
 	{
-		// Reset health on component
-		
-		if (SpawnPoints.Num() > 0)
-			Player->SetActorLocation(SpawnPoints[FMath::RandRange(0, SpawnPoints.Num() - 1)]->GetActorLocation());
-
+		PlayerHealth->ResetHealth();
+		Player->SetActorLocation(SpawnPoints[FMath::RandRange(0, SpawnPoints.Num() - 1)]->GetActorLocation());
 	}
 }

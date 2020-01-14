@@ -16,5 +16,6 @@ public:
 
 	void RespawnPlayer(AActor* Player);
 
+protected:
 	TArray<AActor*> SpawnPoints;
 };

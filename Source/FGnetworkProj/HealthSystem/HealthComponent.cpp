@@ -76,3 +76,21 @@ void UHealthComponent::TakeDamage(float Value)
 {
 	LowerHealth(Value);
 }
+
+void UHealthComponent::ResetHealth()
+{
+	if (GetOwnerRole() == ROLE_Authority)
+	{
+		ServerResetHealth();
+	}
+}
+
+void UHealthComponent::ServerResetHealth_Implementation()
+{
+	MulticastResetHealth();
+}
+
+void UHealthComponent::MulticastResetHealth_Implementation()
+{
+	CurrentHealth = InitialHealth;
+}

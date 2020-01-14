@@ -30,6 +30,14 @@ protected:
 	bool ServerLowerHealth_Validate(float Value);
 	void ServerLowerHealth_Implementation(float Value);
 
+	UFUNCTION(Server, Reliable)
+	void ServerResetHealth();
+	void ServerResetHealth_Implementation();
+	
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastResetHealth();
+	void MulticastResetHealth_Implementation();
+
 	UFUNCTION(BlueprintPure)
 	float GetHealth();
 
@@ -44,4 +52,6 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 		
 	void TakeDamage(float Value);
+
+	void ResetHealth();
 };
