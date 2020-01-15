@@ -25,6 +25,7 @@ AFGPlayer::AFGPlayer()
 
 	Body = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Body"));
 	Body->SetupAttachment(GetCapsuleComponent());
+	Body->SetCollisionProfileName(TEXT("NoCollision"));
 
 	SetReplicateMovement(false);
 }
@@ -41,7 +42,7 @@ void AFGPlayer::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (Role == ROLE_Authority || Role == ROLE_AutonomousProxy)
+	if (IsLocallyControlled() || Role == ROLE_AutonomousProxy)
 	{
 		if (Role == ROLE_Authority)
 		{
@@ -75,7 +76,7 @@ void AFGPlayer::MoveForward(float Val)
 {
 	if (Val != 0.0f)
 	{
-		//GEngine->AddOnScreenDebugMessage(-2, 5, FColor::Red, FString::Printf(TEXT("%s"), *GETENUMSTRING("ENetRole", Role)));
+		GEngine->AddOnScreenDebugMessage(-2, 5, FColor::Red, FString::Printf(TEXT("%s"), *GETENUMSTRING("ENetRole", Role)));
 		AddMovementInput(GetActorForwardVector(), Val);
 	}
 }
