@@ -7,6 +7,10 @@
 #include <Components/InputComponent.h>
 #include <Components/StaticMeshComponent.h>
 #include <Engine/Engine.h>
+#include <Engine/World.h>
+#include <DrawDebugHelpers.h>
+#include "HealthSystem/HealthComponent.h"
+#include "RespawnComponent.h"
 
 // Sets default values
 AFGPlayer::AFGPlayer()
@@ -27,6 +31,10 @@ AFGPlayer::AFGPlayer()
 	Body->SetupAttachment(GetCapsuleComponent());
 	Body->SetCollisionProfileName(TEXT("NoCollision"));
 
+	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
+
+	RespawnComponent = CreateDefaultSubobject<URespawnComponent>(TEXT("RespawnComponent"));
+
 	SetReplicateMovement(false);
 }
 
@@ -37,12 +45,35 @@ void AFGPlayer::BeginPlay()
 	
 }
 
+void AFGPlayer::FireWeapon()
+{
+	FHitResult Hit;
+	FCollisionQueryParams CollisionParams;
+
+	CollisionParams.AddIgnoredActor(this);
+
+	DrawDebugLine(GetWorld(), GetActorLocation(), GetActorLocation() + CameraComponent->GetForwardVector()*WeaponRange, FColor::Green, false, 1, 0, 1);
+
+	if (GetWorld()->LineTraceSingleByChannel(Hit, GetActorLocation(),
+		GetActorLocation() + CameraComponent->GetForwardVector()*WeaponRange, ECC_Pawn,CollisionParams))
+	{
+		GEngine->AddOnScreenDebugMessage(-2, 5, FColor::Red, FString::Printf(TEXT("%s"), *Hit.Actor->GetName()));
+
+		UHealthComponent* PlayerHealth = Cast<UHealthComponent>(Hit.Actor->FindComponentByClass(UHealthComponent::StaticClass()));
+		if (PlayerHealth)
+		{
+			PlayerHealth->TakeDamage(420.f);
+		}
+			
+	}
+}
+
 // Called every frame
 void AFGPlayer::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (IsLocallyControlled() || Role == ROLE_AutonomousProxy)
+	if (IsLocallyControlled())
 	{
 		if (Role == ROLE_Authority)
 		{
@@ -60,6 +91,8 @@ void AFGPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
+	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &AFGPlayer::FireWeapon);
+
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
 
@@ -76,7 +109,7 @@ void AFGPlayer::MoveForward(float Val)
 {
 	if (Val != 0.0f)
 	{
-		GEngine->AddOnScreenDebugMessage(-2, 5, FColor::Red, FString::Printf(TEXT("%s"), *GETENUMSTRING("ENetRole", Role)));
+		//GEngine->AddOnScreenDebugMessage(-2, 5, FColor::Red, FString::Printf(TEXT("%s"), *GETENUMSTRING("ENetRole", Role)));
 		AddMovementInput(GetActorForwardVector(), Val);
 	}
 }

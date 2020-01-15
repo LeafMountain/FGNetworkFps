@@ -9,6 +9,8 @@
 class UStaticMeshComponent;
 class UCapsuleComponent;
 class UCameraComponent;
+class URespawnComponent;
+class UHealthComponent;
 
 #define GETENUMSTRING(etype, evalue) ( (FindObject<UEnum>(ANY_PACKAGE, TEXT(etype), true) != nullptr) ? FindObject<UEnum>(ANY_PACKAGE, TEXT(etype), true)->GetEnumName((int32)evalue) : FString("Invalid - are you sure enum uses UENUM() macro?") )
 
@@ -18,7 +20,7 @@ class FGNETWORKPROJ_API AFGPlayer : public ACharacter
 	GENERATED_BODY()
 
 public:
-	// Sets default values for this pawn's properties
+	
 	AFGPlayer();
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
@@ -30,6 +32,9 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = Replication)
 	float InterpSpeed = 3.5f;
 
+	UPROPERTY(EditAnywhere)
+	float WeaponRange = 300.f;
+
 protected:
 
 	UFUNCTION(Server, Reliable)
@@ -37,6 +42,8 @@ protected:
 
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_UpdatePositionAndRotation(FRotator Rotation, FVector Location, float DeltaTime);
+
+
 
 	virtual void BeginPlay() override;
 
@@ -48,8 +55,14 @@ protected:
 	UStaticMeshComponent* RightArm;
 	UPROPERTY(VisibleDefaultsOnly, Category = CameraComponent)
 	UCameraComponent* CameraComponent;
+	UPROPERTY(VisibleDefaultsOnly)
+	UHealthComponent* HealthComponent;
+	UPROPERTY(VisibleDefaultsOnly)
+	URespawnComponent* RespawnComponent;
+public:
 
-public:	
+	void FireWeapon();
+
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
