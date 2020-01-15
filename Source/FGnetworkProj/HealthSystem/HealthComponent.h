@@ -22,13 +22,14 @@ protected:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 
-	// UPROPERTY(Replicated)
+	UPROPERTY(Replicated)
 	float CurrentHealth = 0.f;
 
-	UFUNCTION(Server, Reliable, WithValidation)
-	void ServerLowerHealth(float Value);
-	bool ServerLowerHealth_Validate(float Value);
-	void ServerLowerHealth_Implementation(float Value);
+	UFUNCTION(Server, Reliable)
+	void Server_LowerHealth(float Value);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_LowerHealth(float Value);
 
 	UFUNCTION(Server, Reliable)
 	void ServerResetHealth();

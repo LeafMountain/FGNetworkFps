@@ -38,7 +38,6 @@ AFGPlayer::AFGPlayer()
 	SetReplicateMovement(false);
 }
 
-// Called when the game starts or when spawned
 void AFGPlayer::BeginPlay()
 {
 	Super::BeginPlay();
@@ -54,21 +53,39 @@ void AFGPlayer::FireWeapon()
 
 	DrawDebugLine(GetWorld(), GetActorLocation(), GetActorLocation() + CameraComponent->GetForwardVector()*WeaponRange, FColor::Green, false, 1, 0, 1);
 
+	Server_FireWeapon();
+}
+
+void AFGPlayer::Server_FireWeapon_Implementation()
+{
+	FHitResult Hit;
+	FCollisionQueryParams CollisionParams;
+
+	CollisionParams.AddIgnoredActor(this);
+
+	DrawDebugLine(GetWorld(), GetActorLocation(), GetActorLocation() + CameraComponent->GetForwardVector()*WeaponRange, FColor::Green, false, 1, 0, 1);
+
 	if (GetWorld()->LineTraceSingleByChannel(Hit, GetActorLocation(),
-		GetActorLocation() + CameraComponent->GetForwardVector()*WeaponRange, ECC_Pawn,CollisionParams))
+		GetActorLocation() + CameraComponent->GetForwardVector()*WeaponRange, ECC_Pawn, CollisionParams))
 	{
-		GEngine->AddOnScreenDebugMessage(-2, 5, FColor::Red, FString::Printf(TEXT("%s"), *Hit.Actor->GetName()));
+		//GEngine->AddOnScreenDebugMessage(-2, 5, FColor::Red, FString::Printf(TEXT("%s"), *Hit.Actor->GetName()));
 
 		UHealthComponent* PlayerHealth = Cast<UHealthComponent>(Hit.Actor->FindComponentByClass(UHealthComponent::StaticClass()));
 		if (PlayerHealth)
 		{
+			GEngine->AddOnScreenDebugMessage(-2, 5, FColor::Red, FString::Printf(TEXT("%s"), *GETENUMSTRING("ENetRole", Role)));
 			PlayerHealth->TakeDamage(420.f);
+
 		}
-			
+
 	}
 }
 
-// Called every frame
+void AFGPlayer::Multicast_FireWeapon_Implementation()
+{
+	//TODO make weapon fire visuals here
+}
+
 void AFGPlayer::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
@@ -109,7 +126,7 @@ void AFGPlayer::MoveForward(float Val)
 {
 	if (Val != 0.0f)
 	{
-		//GEngine->AddOnScreenDebugMessage(-2, 5, FColor::Red, FString::Printf(TEXT("%s"), *GETENUMSTRING("ENetRole", Role)));
+		
 		AddMovementInput(GetActorForwardVector(), Val);
 	}
 }

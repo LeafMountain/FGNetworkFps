@@ -43,7 +43,11 @@ protected:
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_UpdatePositionAndRotation(FRotator Rotation, FVector Location, float DeltaTime);
 
+	UFUNCTION(Server, Reliable)
+	void Server_FireWeapon();
 
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_FireWeapon();
 
 	virtual void BeginPlay() override;
 
