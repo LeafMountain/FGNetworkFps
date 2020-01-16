@@ -149,6 +149,11 @@ void AFGPlayer::LookUpAtRate(float Rate)
 	AddControllerPitchInput(Rate * BaseLookUpRate * GetWorld()->GetDeltaSeconds());
 }
 
+void AFGPlayer::Die()
+{
+	RespawnComponent->RespawnPlayer(this);
+}
+
 void AFGPlayer::Server_UpdatePositionAndRotation_Implementation(FRotator Rotation, FVector Location, float DeltaTime)
 {
 	Multicast_UpdatePositionAndRotation(Rotation, Location, DeltaTime);

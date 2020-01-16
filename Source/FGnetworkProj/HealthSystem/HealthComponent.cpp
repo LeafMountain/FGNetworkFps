@@ -4,6 +4,8 @@
 #include <Engine/Engine.h>
 #include <GameFramework/Pawn.h>
 #include "Net/UnrealNetwork.h"
+#include "FGnetworkProj/FGPlayer.h"
+
 
 // Sets default values for this component's properties
 UHealthComponent::UHealthComponent()
@@ -51,10 +53,12 @@ void UHealthComponent::Server_LowerHealth_Implementation(float Value)
 void UHealthComponent::Multicast_LowerHealth_Implementation(float Value)
 {
 	GEngine->AddOnScreenDebugMessage(-3, 5, FColor::Red, FString::Printf(TEXT("%f"), CurrentHealth));
-	APawn* Pawn = Cast<APawn>(GetOwner());
-	if (Pawn->IsLocallyControlled() || GetOwnerRole() == ROLE_Authority)
+	AFGPlayer* Player = Cast<AFGPlayer>(GetOwner());
+	if (Player->IsLocallyControlled() || GetOwnerRole() == ROLE_Authority)
 	{
 		CurrentHealth -= Value;
+		if (CurrentHealth <= 0)
+			Player->Die();
 	}
 }
 
