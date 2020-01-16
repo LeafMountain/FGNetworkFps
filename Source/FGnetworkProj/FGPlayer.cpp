@@ -65,8 +65,8 @@ void AFGPlayer::Server_FireWeapon_Implementation()
 
 	DrawDebugLine(GetWorld(), GetActorLocation(), GetActorLocation() + CameraComponent->GetForwardVector()*WeaponRange, FColor::Green, false, 1, 0, 1);
 
-	if (GetWorld()->LineTraceSingleByChannel(Hit, GetActorLocation(),
-		GetActorLocation() + CameraComponent->GetForwardVector()*WeaponRange, ECC_Pawn, CollisionParams))
+	if (GetWorld()->LineTraceSingleByChannel(Hit,CameraComponent->GetComponentLocation(),
+		CameraComponent->GetComponentLocation() + CameraComponent->GetForwardVector()*WeaponRange, ECC_Pawn, CollisionParams))
 	{
 		//GEngine->AddOnScreenDebugMessage(-2, 5, FColor::Red, FString::Printf(TEXT("%s"), *Hit.Actor->GetName()));
 
