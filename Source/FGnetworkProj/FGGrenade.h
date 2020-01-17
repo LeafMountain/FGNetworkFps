@@ -5,7 +5,7 @@
 #include "FGGrenade.generated.h"
 
 class UStaticMeshComponent;
-class UCapsuleComponent;
+class USphereComponent;
 class UPrimitiveComponent;
 
 UCLASS()
@@ -20,28 +20,25 @@ protected:
 	UStaticMeshComponent* Mesh;
 
 	UPROPERTY(VisibleDefaultsOnly, Category = Collider)
-	UCapsuleComponent* Collider;
+    USphereComponent* Collider;
 
 	UPROPERTY(EditAnywhere)
 	float ExplodeDelay = 3;
+
+    UPROPERTY(EditAnywhere)
+    float ThrowForce = 5000;
 
 	FTimerHandle ExplosionTimer;
 
 	void Explode();
 
 	UFUNCTION(BlueprintImplementableEvent)
-	void BP_SpawnGrenade();
+	void BP_Explosion();
+
+    UFUNCTION()
+    void OnOverlapBegin(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
 public:
-
-	virtual void Tick(float DeltaTime) override;
-
 	void ThrowGrenade(FVector ThrowDirection);
-
-	UFUNCTION(Server, Reliable)
-	void Server_UpdatePositionAndRotation(FVector Position, FRotator Rotation);
-
-	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_UpdatePositionAndRotation(FVector Position, FRotator Rotation);
 
 };

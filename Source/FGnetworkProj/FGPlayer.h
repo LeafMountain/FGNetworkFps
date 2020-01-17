@@ -68,6 +68,12 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = Projectile)
 	TSubclassOf<AFGGrenade> Grenades;
 
+    UFUNCTION(Server, Reliable)
+    void Server_ThrowGrenade(FVector ThrowDirection);
+
+    UFUNCTION(NetMulticast, Reliable)
+    void Multicast_ThrowGrenade(FVector ThrowDirection);
+
 public:
 
 	void FireWeapon();

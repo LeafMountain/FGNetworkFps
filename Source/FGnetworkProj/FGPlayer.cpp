@@ -155,9 +155,28 @@ void AFGPlayer::LookUpAtRate(float Rate)
 
 void AFGPlayer::ThrowGrenade()
 {
-	AFGGrenade* Grenade = GetWorld()->SpawnActor<AFGGrenade>(Grenades, GetActorLocation() + CameraComponent->GetForwardVector() * 100, GetActorRotation());
+    if (IsLocallyControlled())
+    {
+        if (Role == ROLE_Authority)
+        {
+            Multicast_ThrowGrenade(CameraComponent->GetForwardVector());
+        }
+        else
+        {
+            Server_ThrowGrenade(CameraComponent->GetForwardVector());
+        }
+    }
+}
 
-	Grenade->ThrowGrenade(CameraComponent->GetForwardVector());
+void AFGPlayer::Server_ThrowGrenade_Implementation(FVector ThrowDirection)
+{
+    Multicast_ThrowGrenade(ThrowDirection);
+}
+
+void AFGPlayer::Multicast_ThrowGrenade_Implementation(FVector ThrowDirection)
+{
+    AFGGrenade* Grenade = GetWorld()->SpawnActor<AFGGrenade>(Grenades, GetActorLocation() + CameraComponent->GetForwardVector() * 100, GetActorRotation());
+    Grenade->ThrowGrenade(ThrowDirection);
 }
 
 void AFGPlayer::Die()
