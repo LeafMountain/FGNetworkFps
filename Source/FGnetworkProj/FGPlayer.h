@@ -54,9 +54,7 @@ protected:
 	UPROPERTY(VisibleDefaultsOnly, Category = Mesh)
 	UStaticMeshComponent* Body;
 	UPROPERTY(VisibleDefaultsOnly, Category = Mesh)
-	UStaticMeshComponent* LeftArm;
-	UPROPERTY(VisibleDefaultsOnly, Category = Mesh)
-	UStaticMeshComponent* RightArm;
+	UStaticMeshComponent* Head;
 	UPROPERTY(VisibleDefaultsOnly, Category = CameraComponent)
 	UCameraComponent* CameraComponent;
 	UPROPERTY(VisibleDefaultsOnly)

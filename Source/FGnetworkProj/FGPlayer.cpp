@@ -31,6 +31,10 @@ AFGPlayer::AFGPlayer()
 	Body->SetupAttachment(GetCapsuleComponent());
 	Body->SetCollisionProfileName(TEXT("NoCollision"));
 
+	Head = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Head"));
+	Head->SetupAttachment(GetCapsuleComponent());
+	Head->SetCollisionProfileName(TEXT("NoCollision"));
+
 	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
 
 	RespawnComponent = CreateDefaultSubobject<URespawnComponent>(TEXT("RespawnComponent"));
