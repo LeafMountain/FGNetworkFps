@@ -11,6 +11,7 @@ class UCapsuleComponent;
 class UCameraComponent;
 class URespawnComponent;
 class UHealthComponent;
+class AFGGrenade;
 
 #define GETENUMSTRING(etype, evalue) ( (FindObject<UEnum>(ANY_PACKAGE, TEXT(etype), true) != nullptr) ? FindObject<UEnum>(ANY_PACKAGE, TEXT(etype), true)->GetEnumName((int32)evalue) : FString("Invalid - are you sure enum uses UENUM() macro?") )
 
@@ -61,6 +62,10 @@ protected:
 	UHealthComponent* HealthComponent;
 	UPROPERTY(VisibleDefaultsOnly)
 	URespawnComponent* RespawnComponent;
+
+	UPROPERTY(EditDefaultsOnly, Category = Projectile)
+	TSubclassOf<AFGGrenade> Grenades;
+
 public:
 
 	void FireWeapon();
@@ -78,6 +83,8 @@ public:
 	void TurnAtRate(float Rate);
 
 	void LookUpAtRate(float Rate);
+
+	void ThrowGrenade();
 
 	void Die();
 };

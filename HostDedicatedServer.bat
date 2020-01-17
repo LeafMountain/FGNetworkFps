@@ -1,1 +1,1 @@
-"%PROGRAMFILES%\Epic Games\UE_4.24\Engine\Binaries\Win64\UE4Editor.exe" "%CD%\FGnetworkProj.uproject" dedust2devidedBy2?listen -server -log -nosteam
+"%PROGRAMFILES%\Epic Games\UE_4.24\Engine\Binaries\Win64\UE4Editor.exe" "%CD%\FGnetworkProj.uproject" FirstPersonExampleMap?listen -server -log -nosteam

@@ -11,6 +11,8 @@
 #include <DrawDebugHelpers.h>
 #include "HealthSystem/HealthComponent.h"
 #include "RespawnComponent.h"
+#include <FGnetworkProj/FGGrenade.h>
+#include "FGGrenade.h"
 
 // Sets default values
 AFGPlayer::AFGPlayer()
@@ -69,8 +71,8 @@ void AFGPlayer::Server_FireWeapon_Implementation()
 
 	DrawDebugLine(GetWorld(), GetActorLocation(), GetActorLocation() + CameraComponent->GetForwardVector()*WeaponRange, FColor::Green, false, 1, 0, 1);
 
-	if (GetWorld()->LineTraceSingleByChannel(Hit,CameraComponent->GetComponentLocation(),
-		CameraComponent->GetComponentLocation() + CameraComponent->GetForwardVector()*WeaponRange, ECC_Pawn, CollisionParams))
+	if (GetWorld()->LineTraceSingleByChannel(Hit, GetActorLocation(),
+		GetActorLocation() + CameraComponent->GetForwardVector()*WeaponRange, ECC_Pawn, CollisionParams))
 	{
 		//GEngine->AddOnScreenDebugMessage(-2, 5, FColor::Red, FString::Printf(TEXT("%s"), *Hit.Actor->GetName()));
 
@@ -117,6 +119,8 @@ void AFGPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
 
+	PlayerInputComponent->BindAction("ThrowGrenade", IE_Pressed, this, &AFGPlayer::ThrowGrenade);
+
 	PlayerInputComponent->BindAxis("MoveForward", this, &AFGPlayer::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &AFGPlayer::MoveRight);
 
@@ -151,6 +155,13 @@ void AFGPlayer::TurnAtRate(float Rate)
 void AFGPlayer::LookUpAtRate(float Rate)
 {
 	AddControllerPitchInput(Rate * BaseLookUpRate * GetWorld()->GetDeltaSeconds());
+}
+
+void AFGPlayer::ThrowGrenade()
+{
+	AFGGrenade* Grenade = GetWorld()->SpawnActor<AFGGrenade>(Grenades, GetActorLocation() + CameraComponent->GetForwardVector() * 100, GetActorRotation());
+
+	Grenade->ThrowGrenade(CameraComponent->GetForwardVector());
 }
 
 void AFGPlayer::Die()
