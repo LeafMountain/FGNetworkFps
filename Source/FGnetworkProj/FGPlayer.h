@@ -33,8 +33,19 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = Replication)
 	float InterpSpeed = 3.5f;
 
-	UPROPERTY(EditAnywhere)
-	float WeaponRange = 300.f;
+	UPROPERTY(EditAnywhere, Category = Weapon)
+	float WeaponRange = 30000.f;
+
+	UPROPERTY(EditDefaultsOnly, Category = Weapon)
+	float WeaponDamage = 200.f;
+
+	UPROPERTY(EditDefaultsOnly, Category = Weapon)
+	float HeadShootDamage = 500.f;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Mesh)
+	UStaticMeshComponent* Body;
+	UPROPERTY(VisibleDefaultsOnly, Category = Mesh)
+	UStaticMeshComponent* Head;
 
 protected:
 
@@ -48,14 +59,9 @@ protected:
 	void Server_FireWeapon();
 
 	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_FireWeapon();
+	void Multicast_FireWeapon(FHitResult Hit);
 
 	virtual void BeginPlay() override;
-
-	UPROPERTY(VisibleDefaultsOnly, Category = Mesh)
-	UStaticMeshComponent* Body;
-	UPROPERTY(VisibleDefaultsOnly, Category = Mesh)
-	UStaticMeshComponent* Head;
 	UPROPERTY(VisibleDefaultsOnly, Category = CameraComponent)
 	UCameraComponent* CameraComponent;
 	UPROPERTY(VisibleDefaultsOnly)
@@ -83,6 +89,8 @@ public:
 	void TurnAtRate(float Rate);
 
 	void LookUpAtRate(float Rate);
+
+	void TakeDamage(float Damage);
 
 	void ThrowGrenade();
 
