@@ -19,11 +19,14 @@ protected:
 	UPROPERTY(VisibleDefaultsOnly, Category = Mesh)
 	UStaticMeshComponent* Mesh;
 
-	UPROPERTY(VisibleDefaultsOnly, Category = Collider)
-    USphereComponent* Collider;
+	UPROPERTY(EditAnywhere, Category = Collider)
+	USphereComponent* Collider;
 
 	UPROPERTY(EditAnywhere)
-	float ExplodeDelay = 3;
+	float ExplosionDelay = 3;
+
+	UPROPERTY(EditAnywhere)
+	float Damage = 1;
 
     UPROPERTY(EditAnywhere)
     float ThrowForce = 5000;
@@ -35,8 +38,7 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent)
 	void BP_Explosion();
 
-    UFUNCTION()
-    void OnOverlapBegin(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	TArray<AActor*> OverlappingActors;
 
 public:
 	void ThrowGrenade(FVector ThrowDirection);

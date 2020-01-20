@@ -5,16 +5,20 @@
 #include <Engine/World.h>
 #include "Engine/Engine.h"
 #include "FGnetworkProj/FGPlayer.h"
+#include "HealthSystem/HealthComponent.h"
+#include "Components/PrimitiveComponent.h"
 
 AFGGrenade::AFGGrenade()
 {
 	Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
 	Mesh->SetSimulatePhysics(true);
-	RootComponent = Mesh;
 
-	Collider = CreateDefaultSubobject<USphereComponent>(TEXT("Collider"));    
-    Collider->SetSphereRadius(0);
-    Collider->OnComponentBeginOverlap.AddDynamic(this, &AFGGrenade::OnOverlapBegin);
+	Collider = CreateDefaultSubobject<USphereComponent>(TEXT("Collider"));   
+    Collider->SetSphereRadius(100);
+	Collider->bHiddenInGame = false;
+
+	RootComponent = Mesh;
+	Collider->SetupAttachment(Mesh);
 
 	bReplicates = true;
 	PrimaryActorTick.bCanEverTick = false;
@@ -23,18 +27,28 @@ AFGGrenade::AFGGrenade()
 void AFGGrenade::Explode()
 {
     BP_Explosion();
-    //Collider->SetSphereRadius(1000);
+
+	if (Role != ROLE_Authority)
+		return;
+
+	Collider->GetOverlappingActors(OverlappingActors);
+
+	for (int i = 0; i < OverlappingActors.Num(); i++)
+	{
+		UHealthComponent* PlayerHealth = Cast<UHealthComponent>(OverlappingActors[i]->GetComponentByClass(UHealthComponent::StaticClass()));
+		if (PlayerHealth != nullptr)
+		{
+			GEngine->AddOnScreenDebugMessage(-i - 1, 5, FColor::Red, FString::Printf(TEXT("damage")));
+			PlayerHealth->TakeDamage(Damage);
+		}
+	}
+
     Destroy();
 }
 
-void AFGGrenade::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
-{
-    //if (OtherActor->IsA(AFGPlayer::StaticClass()))
-    //    GEngine->AddOnScreenDebugMessage(-2, 5, FColor::Red, FString::Printf(TEXT("HIT!!!")));
-}
 
 void AFGGrenade::ThrowGrenade(FVector ThrowDirection)
 {
 	Mesh->AddImpulse(ThrowDirection * ThrowForce);
-	GetWorldTimerManager().SetTimer(ExplosionTimer, this, &AFGGrenade::Explode, ExplodeDelay, false);
+	GetWorldTimerManager().SetTimer(ExplosionTimer, this, &AFGGrenade::Explode, ExplosionDelay, false);
 }
