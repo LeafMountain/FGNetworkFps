@@ -16,6 +16,8 @@ public:
 	AFGGrenade();
 
 protected:
+	virtual void BeginPlay() override;
+
 	UPROPERTY(VisibleDefaultsOnly, Category = Mesh)
 	UStaticMeshComponent* Mesh;
 
