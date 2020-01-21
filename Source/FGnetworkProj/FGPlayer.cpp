@@ -13,6 +13,7 @@
 #include "RespawnComponent.h"
 #include <FGnetworkProj/FGGrenade.h>
 #include "FGGrenade.h"
+#include <Engine/CollisionProfile.h>
 
 // Sets default values
 AFGPlayer::AFGPlayer()
@@ -31,17 +32,42 @@ AFGPlayer::AFGPlayer()
 
 	Body = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Body"));
 	Body->SetupAttachment(GetCapsuleComponent());
-	Body->SetCollisionProfileName(TEXT("OverlapAll"));
+	Body->SetCollisionProfileName(TEXT("NoCollision"));
 
 	Head = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Head"));
 	Head->SetupAttachment(GetCapsuleComponent());
-	Head->SetCollisionProfileName(TEXT("OverlapAll"));
+	Head->SetCollisionProfileName(TEXT("NoCollision"));
+
+	BodyHitbox = CreateDefaultSubobject<UCapsuleComponent>(TEXT("BodyHitBox"));
+	BodyHitbox->SetupAttachment(GetCapsuleComponent());
+	BodyHitbox->SetCollisionProfileName(UCollisionProfile::Pawn_ProfileName);
+
+	HeadHitbox = CreateDefaultSubobject<UCapsuleComponent>(TEXT("HeadHitBox"));
+	HeadHitbox->SetupAttachment(GetCapsuleComponent());
+	HeadHitbox->SetCollisionProfileName(UCollisionProfile::Pawn_ProfileName);
+
+	Gun = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Gun"));
+	Gun->SetupAttachment(CameraComponent);
+	Gun->SetCollisionProfileName(TEXT("NoCollision"));
 
 	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
 
 	RespawnComponent = CreateDefaultSubobject<URespawnComponent>(TEXT("RespawnComponent"));
 
 	SetReplicateMovement(false);
+}
+
+void AFGPlayer::Server_UpdateCameraRotation_Implementation(float Rate)
+{
+	Multicast_UppdateCameraRotation(Rate);
+}
+
+void AFGPlayer::Multicast_UppdateCameraRotation_Implementation(float Rate)
+{
+	if (Role == ROLE_Authority || Role == ROLE_SimulatedProxy)
+	{
+		AddControllerPitchInput(Rate * BaseLookUpRate * GetWorld()->GetDeltaSeconds());
+	}
 }
 
 void AFGPlayer::BeginPlay()
@@ -52,17 +78,11 @@ void AFGPlayer::BeginPlay()
 
 void AFGPlayer::FireWeapon()
 {
-	FHitResult Hit;
-	FCollisionQueryParams CollisionParams;
 
-	CollisionParams.AddIgnoredActor(this);
-
-	DrawDebugLine(GetWorld(), GetActorLocation(), GetActorLocation() + CameraComponent->GetForwardVector()*WeaponRange, FColor::Green, false, 1, 0, 1);
-
-	Server_FireWeapon();
+	Server_FireWeapon(CameraComponent->GetForwardVector());
 }
 
-void AFGPlayer::Server_FireWeapon_Implementation()
+void AFGPlayer::Server_FireWeapon_Implementation(FVector ForwardDirection)
 {
 	//TODO remake this funktion
 
@@ -72,35 +92,42 @@ void AFGPlayer::Server_FireWeapon_Implementation()
 	CollisionParams.AddIgnoredActor(this);
 
 	if (GetWorld()->LineTraceSingleByChannel(Hit, GetActorLocation(),
-		GetActorLocation() + CameraComponent->GetForwardVector()*WeaponRange, ECC_Pawn, CollisionParams))
+		GetActorLocation() + ForwardDirection*WeaponRange, ECC_Pawn, CollisionParams))
 	{
 		//GEngine->AddOnScreenDebugMessage(-2, 5, FColor::Red, FString::Printf(TEXT("%s"), *Hit.Actor->GetName()));
 
 		FHitResult WhatBodyPartHit;
 		FCollisionQueryParams Cp;
+
+		Cp.AddIgnoredActor(this);
 		Cp.AddIgnoredComponent(Hit.GetComponent());
-		if (GetWorld()->LineTraceSingleByChannel(WhatBodyPartHit, Hit.ImpactPoint, Hit.ImpactPoint + CameraComponent->GetForwardVector() * 100.f, ECC_Visibility, Cp))
+
+		if (GetWorld()->LineTraceSingleByChannel(WhatBodyPartHit, GetActorLocation(),
+			GetActorLocation() +ForwardDirection*WeaponRange, ECC_Pawn, Cp))
 		{
 			Multicast_FireWeapon(Hit);
 
 			AFGPlayer* HitPlayer = Cast<AFGPlayer>(Hit.Actor);
-			if (Hit.GetComponent() == HitPlayer->Body)
+			if (HitPlayer)
 			{
-				HitPlayer->TakeDamage(WeaponDamage);
-			}
-			else if(Hit.GetComponent() == HitPlayer->Head)
-			{
-				HitPlayer->TakeDamage(HeadShootDamage);
+				GEngine->AddOnScreenDebugMessage(-2, 5, FColor::Red, FString::Printf(TEXT("%s"), *WhatBodyPartHit.Component->GetName()));
+				if (WhatBodyPartHit.GetComponent()->GetName() == HitPlayer->BodyHitbox->GetName())
+				{
+					HitPlayer->TakeDamage(WeaponDamage);
+				}
+				else if (WhatBodyPartHit.GetComponent()->GetName() == HitPlayer->HeadHitbox->GetName())
+				{
+					HitPlayer->TakeDamage(HeadShootDamage);
+				}
 			}
 		}
-
 	}
 }
 
 void AFGPlayer::Multicast_FireWeapon_Implementation(FHitResult Hit)
 {
 	//TODO make weapon fire visuals here
-	DrawDebugLine(GetWorld(), Hit.ImpactPoint, Hit.ImpactPoint + CameraComponent->GetForwardVector()* 100.f, FColor::Purple, false, 1, 0, 1);
+	DrawDebugLine(GetWorld(), GetActorLocation(),GetActorLocation() + CameraComponent->GetForwardVector()*WeaponRange, FColor::Purple, false, 1, 0, 1);
 }
 
 void AFGPlayer::Tick(float DeltaTime)
@@ -165,7 +192,17 @@ void AFGPlayer::TurnAtRate(float Rate)
 
 void AFGPlayer::LookUpAtRate(float Rate)
 {
-	AddControllerPitchInput(Rate * BaseLookUpRate * GetWorld()->GetDeltaSeconds());
+	//AddControllerPitchInput(Rate * BaseLookUpRate * GetWorld()->GetDeltaSeconds());
+
+	if (IsLocallyControlled())
+	{
+		if (ROLE_Authority)
+		{
+			Multicast_UppdateCameraRotation(Rate);
+		}
+		else
+			Server_UpdateCameraRotation(Rate);
+	}
 }
 
 void AFGPlayer::TakeDamage(float Damage)
@@ -215,5 +252,6 @@ void AFGPlayer::Multicast_UpdatePositionAndRotation_Implementation(FRotator Rota
 	{
 		SetActorRotation(FMath::RInterpTo(GetActorRotation(), Rotation, DeltaTime, InterpSpeed));
 		SetActorLocation(FMath::VInterpTo(GetActorLocation(), Location, DeltaTime, InterpSpeed));
+		
 	}
 }
