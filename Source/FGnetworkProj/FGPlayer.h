@@ -78,6 +78,11 @@ protected:
     UFUNCTION(NetMulticast, Reliable)
     void Multicast_ThrowGrenade(FVector ThrowDirection);
 
+	UPROPERTY(EditAnywhere)
+	int MaxAmountGrenades = 2;
+
+	int CurrentAmountGrenades;
+
 public:
 
 	void FireWeapon();

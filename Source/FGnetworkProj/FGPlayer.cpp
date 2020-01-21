@@ -20,6 +20,8 @@ AFGPlayer::AFGPlayer()
 	BaseTurnRate = 45.f;
 	BaseLookUpRate = 45.f;
  	
+	CurrentAmountGrenades = MaxAmountGrenades;
+
 	bReplicates = true;
 	PrimaryActorTick.bCanEverTick = true;
 
@@ -190,6 +192,10 @@ void AFGPlayer::ThrowGrenade()
 
 void AFGPlayer::Server_ThrowGrenade_Implementation(FVector ThrowDirection)
 {
+	if (CurrentAmountGrenades <= 0)
+		return;
+
+	CurrentAmountGrenades--;
     Multicast_ThrowGrenade(ThrowDirection);
 }
 
