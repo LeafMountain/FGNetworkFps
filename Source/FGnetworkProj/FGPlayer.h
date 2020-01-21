@@ -12,6 +12,7 @@ class UCameraComponent;
 class URespawnComponent;
 class UHealthComponent;
 class AFGGrenade;
+class USkeletalMeshComponent;
 
 #define GETENUMSTRING(etype, evalue) ( (FindObject<UEnum>(ANY_PACKAGE, TEXT(etype), true) != nullptr) ? FindObject<UEnum>(ANY_PACKAGE, TEXT(etype), true)->GetEnumName((int32)evalue) : FString("Invalid - are you sure enum uses UENUM() macro?") )
 
@@ -43,11 +44,23 @@ public:
 	float HeadShootDamage = 500.f;
 
 	UPROPERTY(VisibleDefaultsOnly, Category = Mesh)
+	USkeletalMeshComponent* Gun;
+	UPROPERTY(VisibleDefaultsOnly, Category = Mesh)
 	UStaticMeshComponent* Body;
 	UPROPERTY(VisibleDefaultsOnly, Category = Mesh)
 	UStaticMeshComponent* Head;
+	UPROPERTY(VisibleDefaultsOnly, Category = Hitbox)
+	UCapsuleComponent* HeadHitbox;
+	UPROPERTY(VisibleDefaultsOnly, Category = Hitbox)
+	UCapsuleComponent* BodyHitbox;
 
 protected:
+
+	UFUNCTION(Server, Reliable)
+	void Server_UpdateCameraRotation(float Rate);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_UppdateCameraRotation(float Rate);
 
 	UFUNCTION(Server, Reliable)
 	void Server_UpdatePositionAndRotation(FRotator Rotation, FVector Location, float DeltaTime);
@@ -56,7 +69,7 @@ protected:
 	void Multicast_UpdatePositionAndRotation(FRotator Rotation, FVector Location, float DeltaTime);
 
 	UFUNCTION(Server, Reliable)
-	void Server_FireWeapon();
+	void Server_FireWeapon(FVector ForwardDirection);
 
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_FireWeapon(FHitResult Hit);

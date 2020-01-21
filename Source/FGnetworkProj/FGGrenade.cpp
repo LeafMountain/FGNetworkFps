@@ -24,11 +24,6 @@ AFGGrenade::AFGGrenade()
 	PrimaryActorTick.bCanEverTick = false;
 }
 
-void AFGGrenade::BeginPlay()
-{
-	Super::BeginPlay();
-}
-
 void AFGGrenade::Explode()
 {
     BP_Explosion();
