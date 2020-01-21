@@ -195,7 +195,10 @@ void AFGPlayer::Server_ThrowGrenade_Implementation(FVector ThrowDirection)
 
 void AFGPlayer::Multicast_ThrowGrenade_Implementation(FVector ThrowDirection)
 {
-    AFGGrenade* Grenade = GetWorld()->SpawnActor<AFGGrenade>(Grenades, GetActorLocation() + CameraComponent->GetForwardVector() * 100, GetActorRotation());
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.Owner = this;
+
+    AFGGrenade* Grenade = GetWorld()->SpawnActor<AFGGrenade>(Grenades, GetActorLocation() + CameraComponent->GetForwardVector() * 100, GetActorRotation(), SpawnParams);
     Grenade->ThrowGrenade(ThrowDirection);
 }
 
