@@ -28,18 +28,18 @@ void AFGGrenade::Explode()
 {
     BP_Explosion();
 
-	if (Role != ROLE_Authority)
-		return;
 
-	Collider->GetOverlappingActors(OverlappingActors);
-
-	for (int i = 0; i < OverlappingActors.Num(); i++)
+	if (GetOwner()->Role == ROLE_Authority)
 	{
-		UHealthComponent* PlayerHealth = Cast<UHealthComponent>(OverlappingActors[i]->GetComponentByClass(UHealthComponent::StaticClass()));
-		if (PlayerHealth != nullptr)
+		Collider->GetOverlappingActors(OverlappingActors);
+
+		for (int i = 0; i < OverlappingActors.Num(); i++)
 		{
-			GEngine->AddOnScreenDebugMessage(-i - 1, 5, FColor::Red, FString::Printf(TEXT("damage")));
-			PlayerHealth->TakeDamage(Damage);
+			UHealthComponent* PlayerHealth = Cast<UHealthComponent>(OverlappingActors[i]->GetComponentByClass(UHealthComponent::StaticClass()));
+			if (PlayerHealth != nullptr)
+			{
+				PlayerHealth->TakeDamage(Damage);
+			}
 		}
 	}
 

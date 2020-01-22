@@ -40,6 +40,9 @@ protected:
 
 	TArray<AActor*> OverlappingActors;
 
+	TArray<AActor*> DamagedActors;
+
+
 public:
 	void ThrowGrenade(FVector ThrowDirection);
 
