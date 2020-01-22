@@ -232,8 +232,10 @@ void AFGPlayer::ThrowGrenade()
 void AFGPlayer::Server_ThrowGrenade_Implementation(FVector ThrowDirection)
 {
 	if (CurrentAmountGrenades > 0)
+	{
 		Multicast_ThrowGrenade(ThrowDirection);
-	CurrentAmountGrenades--;
+		CurrentAmountGrenades--;
+	}
 }
 
 void AFGPlayer::Multicast_ThrowGrenade_Implementation(FVector ThrowDirection)
