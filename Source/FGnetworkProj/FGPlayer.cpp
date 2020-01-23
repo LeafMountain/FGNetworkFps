@@ -100,7 +100,7 @@ void AFGPlayer::Server_FireWeapon_Implementation(FVector ForwardDirection)
 	CollisionParams.AddIgnoredActor(this);
 	
 
-	if (GetWorld()->LineTraceSingleByChannel(Hit, GetActorLocation(),
+	if (GetWorld()->LineTraceSingleByChannel(Hit, CameraComponent->GetComponentLocation(),
 		GetActorLocation() + ForwardDirection*WeaponRange, ECC_Pawn, CollisionParams))
 	{
 		//GEngine->AddOnScreenDebugMessage(-2, 5, FColor::Red, FString::Printf(TEXT("%s"), *Hit.Actor->GetName()));
