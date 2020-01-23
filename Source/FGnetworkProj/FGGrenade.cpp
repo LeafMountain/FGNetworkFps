@@ -21,13 +21,37 @@ AFGGrenade::AFGGrenade()
 	Collider->SetupAttachment(Mesh);
 
 	bReplicates = true;
-	PrimaryActorTick.bCanEverTick = false;
+	PrimaryActorTick.bCanEverTick = true;
+}
+
+void AFGGrenade::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	if (GetOwner()->Role == ROLE_Authority)
+	{
+		Multicast_UpdatePosition(GetActorLocation());
+	}
+}
+
+void AFGGrenade::Multicast_Explosion_Implementation()
+{
+	BP_Explosion();
+}
+
+void AFGGrenade::Server_UpdatePosition_Implementation(FVector Position)
+{
+	Multicast_UpdatePosition(Position);
+}
+
+void AFGGrenade::Multicast_UpdatePosition_Implementation(FVector Position)
+{
+	SetActorLocation(Position);
 }
 
 void AFGGrenade::Explode()
 {
-    BP_Explosion();
-
+	Multicast_Explosion();
 
 	if (GetOwner()->Role == ROLE_Authority)
 	{

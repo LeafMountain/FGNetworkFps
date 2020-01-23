@@ -16,6 +16,17 @@ public:
 	AFGGrenade();
 
 protected:
+	virtual void Tick(float DeltaTime) override;
+
+	UFUNCTION(Server, Reliable)
+	void Server_UpdatePosition(FVector Position);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_UpdatePosition(FVector Position);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_Explosion();
+
 	UPROPERTY(VisibleDefaultsOnly, Category = Mesh)
 	UStaticMeshComponent* Mesh;
 
@@ -39,9 +50,6 @@ protected:
 	void BP_Explosion();
 
 	TArray<AActor*> OverlappingActors;
-
-	TArray<AActor*> DamagedActors;
-
 
 public:
 	void ThrowGrenade(FVector ThrowDirection);
