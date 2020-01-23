@@ -230,14 +230,7 @@ void AFGPlayer::ThrowGrenade()
 {
     if (IsLocallyControlled())
     {
-        if (Role == ROLE_Authority)
-        {
-            Multicast_ThrowGrenade(CameraComponent->GetForwardVector());
-        }
-        else
-        {
-            Server_ThrowGrenade(CameraComponent->GetForwardVector());
-        }
+		Server_ThrowGrenade(CameraComponent->GetForwardVector());
     }
 }
 
@@ -252,6 +245,9 @@ void AFGPlayer::Server_ThrowGrenade_Implementation(FVector ThrowDirection)
 
 void AFGPlayer::Multicast_ThrowGrenade_Implementation(FVector ThrowDirection)
 {
+	if (Role != ROLE_Authority)
+		return;
+
 	FActorSpawnParameters SpawnParams;
 	SpawnParams.Owner = this;
 
