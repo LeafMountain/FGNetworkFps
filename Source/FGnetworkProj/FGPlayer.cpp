@@ -54,6 +54,10 @@ AFGPlayer::AFGPlayer()
 	Gun->SetupAttachment(CameraComponent);
 	Gun->SetCollisionProfileName(TEXT("NoCollision"));
 
+	MuzzleLocation = CreateDefaultSubobject<USceneComponent>(TEXT("MuzzleLocation"));
+	MuzzleLocation->SetupAttachment(Gun);
+	MuzzleLocation->SetRelativeLocation(FVector(0.2f, 48.4f, -10.6f));
+
 	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
 
 	RespawnComponent = CreateDefaultSubobject<URespawnComponent>(TEXT("RespawnComponent"));
@@ -94,6 +98,7 @@ void AFGPlayer::Server_FireWeapon_Implementation(FVector ForwardDirection)
 	FCollisionQueryParams CollisionParams;
 
 	CollisionParams.AddIgnoredActor(this);
+	
 
 	if (GetWorld()->LineTraceSingleByChannel(Hit, GetActorLocation(),
 		GetActorLocation() + ForwardDirection*WeaponRange, ECC_Pawn, CollisionParams))
@@ -109,8 +114,6 @@ void AFGPlayer::Server_FireWeapon_Implementation(FVector ForwardDirection)
 		if (GetWorld()->LineTraceSingleByChannel(WhatBodyPartHit, GetActorLocation(),
 			GetActorLocation() +ForwardDirection*WeaponRange, ECC_Pawn, Cp))
 		{
-			Multicast_FireWeapon(Hit);
-
 			AFGPlayer* HitPlayer = Cast<AFGPlayer>(Hit.Actor);
 			if (HitPlayer)
 			{
@@ -125,13 +128,22 @@ void AFGPlayer::Server_FireWeapon_Implementation(FVector ForwardDirection)
 				}
 			}
 		}
+	Multicast_FireWeapon(Hit);
 	}
 }
 
 void AFGPlayer::Multicast_FireWeapon_Implementation(FHitResult Hit)
 {
 	//TODO make weapon fire visuals here
-	DrawDebugLine(GetWorld(), GetActorLocation(),GetActorLocation() + CameraComponent->GetForwardVector()*WeaponRange, FColor::Purple, false, 1, 0, 1);
+	//DrawDebugLine(GetWorld(), GetActorLocation(),GetActorLocation() + CameraComponent->GetForwardVector()*WeaponRange, FColor::Purple, false, 1, 0, 1);
+
+	if (Role == ROLE_Authority)
+	{
+		return;
+	}
+
+	BP_MuzzleFlash();
+	BP_HitLocation(Hit);
 }
 
 void AFGPlayer::Tick(float DeltaTime)

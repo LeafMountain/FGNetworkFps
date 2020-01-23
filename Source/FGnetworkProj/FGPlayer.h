@@ -13,6 +13,7 @@ class URespawnComponent;
 class UHealthComponent;
 class AFGGrenade;
 class USkeletalMeshComponent;
+class USceneComponent;
 
 #define GETENUMSTRING(etype, evalue) ( (FindObject<UEnum>(ANY_PACKAGE, TEXT(etype), true) != nullptr) ? FindObject<UEnum>(ANY_PACKAGE, TEXT(etype), true)->GetEnumName((int32)evalue) : FString("Invalid - are you sure enum uses UENUM() macro?") )
 
@@ -34,7 +35,7 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = Replication)
 	float InterpSpeed = 3.5f;
 
-	UPROPERTY(EditAnywhere, Category = Weapon)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Weapon)
 	float WeaponRange = 30000.f;
 
 	UPROPERTY(EditDefaultsOnly, Category = Weapon)
@@ -53,8 +54,16 @@ public:
 	UCapsuleComponent* HeadHitbox;
 	UPROPERTY(VisibleDefaultsOnly, Category = Hitbox)
 	UCapsuleComponent* BodyHitbox;
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = Mesh)
+	USceneComponent* MuzzleLocation;
 
 protected:
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void BP_MuzzleFlash();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void BP_HitLocation(FHitResult hit);
 
 	UFUNCTION(Server, Reliable)
 	void Server_UpdateCameraRotation(float Rate);
@@ -81,7 +90,6 @@ protected:
 	UHealthComponent* HealthComponent;
 	UPROPERTY(VisibleDefaultsOnly)
 	URespawnComponent* RespawnComponent;
-
 	UPROPERTY(EditDefaultsOnly, Category = Projectile)
 	TSubclassOf<AFGGrenade> Grenades;
 
