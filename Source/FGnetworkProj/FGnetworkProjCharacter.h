@@ -8,6 +8,8 @@
 
 class UInputComponent;
 
+//DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnDamageDone, int, DamageValue);
+
 UCLASS(config=Game)
 class AFGnetworkProjCharacter : public ACharacter
 {
@@ -138,5 +140,8 @@ public:
 	/** Returns FirstPersonCameraComponent subobject **/
 	FORCEINLINE class UCameraComponent* GetFirstPersonCameraComponent() const { return FirstPersonCameraComponent; }
 
-};
+	//UPROPERTY(BlueprintAssignable)
+	//FOnDamageDone OnDamageDone;
 
+	//void DamageDone(AActor* SelfActor, AActor* OtherActor, FVector NormalImpulse, const FHitResult& Hit);
+};

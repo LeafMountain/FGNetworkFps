@@ -127,4 +127,7 @@ public:
 	void ThrowGrenade();
 
 	void Die();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnDamageDone(float Value);
 };

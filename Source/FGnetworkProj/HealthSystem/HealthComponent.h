@@ -6,6 +6,7 @@
 #include "Components/ActorComponent.h"
 #include "HealthComponent.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FHealthEvent);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class FGNETWORKPROJ_API UHealthComponent : public UActorComponent
@@ -55,4 +56,7 @@ public:
 	void TakeDamage(float Value);
 
 	void ResetHealth();
+
+	UPROPERTY(BlueprintAssignable)
+	FHealthEvent OnHealthDepleted;
 };

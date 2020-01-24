@@ -11,6 +11,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "MotionControllerComponent.h"
 #include "XRMotionControllerBase.h" // for FXRMotionControllerBase::RightHandSourceId
+#include "HealthSystem/HealthComponent.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogFPChar, Warning, All);
 
@@ -164,6 +165,8 @@ void AFGnetworkProjCharacter::OnFire()
 
 				// spawn the projectile at the muzzle
 				World->SpawnActor<AFGnetworkProjProjectile>(ProjectileClass, SpawnLocation, SpawnRotation, ActorSpawnParams);
+				//projectile->OnActorHit.AddDynamic(this, &AFGPlayer::DamageDone);
+				//AActor OnActorHit, AActor* SelfActor, AActor* OtherActor, FVector NormalImpulse, const FHitResult& Hit
 			}
 		}
 	}
@@ -298,3 +301,11 @@ bool AFGnetworkProjCharacter::EnableTouchscreenMovement(class UInputComponent* P
 	
 	return false;
 }
+//
+//void AFGnetworkProjCharacter::DamageDone(AActor* SelfActor, AActor* OtherActor, FVector NormalImpulse, const FHitResult& Hit)
+//{
+//	if (OtherActor->GetComponentByClass(UHealthComponent::StaticClass()))
+//	{
+//		OnDamageDone.Broadcast(1);
+//	}
+//}

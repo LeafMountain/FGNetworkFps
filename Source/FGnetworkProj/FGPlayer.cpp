@@ -86,7 +86,6 @@ void AFGPlayer::BeginPlay()
 
 void AFGPlayer::FireWeapon()
 {
-
 	Server_FireWeapon(CameraComponent->GetForwardVector());
 }
 
@@ -112,23 +111,34 @@ void AFGPlayer::Server_FireWeapon_Implementation(FVector ForwardDirection)
 		Cp.AddIgnoredComponent(Hit.GetComponent());
 
 		if (GetWorld()->LineTraceSingleByChannel(WhatBodyPartHit, GetActorLocation(),
-			GetActorLocation() +ForwardDirection*WeaponRange, ECC_Pawn, Cp))
+			GetActorLocation() + ForwardDirection * WeaponRange, ECC_Pawn, Cp))
 		{
 			AFGPlayer* HitPlayer = Cast<AFGPlayer>(Hit.Actor);
 			if (HitPlayer)
 			{
 				GEngine->AddOnScreenDebugMessage(-2, 5, FColor::Red, FString::Printf(TEXT("%s"), *WhatBodyPartHit.Component->GetName()));
+				float FinalDamage = 0;
 				if (WhatBodyPartHit.GetComponent()->GetName() == HitPlayer->BodyHitbox->GetName())
 				{
-					HitPlayer->TakeDamage(WeaponDamage);
+					//HitPlayer->TakeDamage(WeaponDamage);
+					FinalDamage = WeaponDamage;
 				}
 				else if (WhatBodyPartHit.GetComponent()->GetName() == HitPlayer->HeadHitbox->GetName())
 				{
-					HitPlayer->TakeDamage(HeadShootDamage);
+					//HitPlayer->TakeDamage(HeadShootDamage);
+					FinalDamage = HeadShootDamage;
+				}
+
+				//OnDamageDone.Broadcast(FinalDamage);
+
+				if (HitPlayer->GetComponentByClass(UHealthComponent::StaticClass()))
+				{
+					HitPlayer->TakeDamage(FinalDamage);
+					OnDamageDone(FinalDamage);
 				}
 			}
 		}
-	Multicast_FireWeapon(Hit);
+		Multicast_FireWeapon(Hit);
 	}
 }
 
@@ -188,7 +198,6 @@ void AFGPlayer::MoveForward(float Val)
 {
 	if (Val != 0.0f)
 	{
-		
 		AddMovementInput(GetActorForwardVector(), Val);
 	}
 }
@@ -223,7 +232,7 @@ void AFGPlayer::LookUpAtRate(float Rate)
 
 void AFGPlayer::TakeDamage(float Damage)
 {
-	HealthComponent->TakeDamage(Damage);
+	//HealthComponent->TakeDamage(Damage);
 }
 
 void AFGPlayer::ThrowGrenade()
