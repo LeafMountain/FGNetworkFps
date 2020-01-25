@@ -50,7 +50,6 @@ protected:
 	float InitialHealth = 1.f;
 
 public:	
-	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 		
 	void TakeDamage(float Value);

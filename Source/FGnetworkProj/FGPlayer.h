@@ -46,14 +46,20 @@ public:
 
 	UPROPERTY(VisibleDefaultsOnly, Category = Mesh)
 	USkeletalMeshComponent* Gun;
-	UPROPERTY(VisibleDefaultsOnly, Category = Mesh)
-	UStaticMeshComponent* Body;
-	UPROPERTY(VisibleDefaultsOnly, Category = Mesh)
-	UStaticMeshComponent* Head;
+	//UPROPERTY(VisibleDefaultsOnly, Category = Mesh)
+	//	UStaticMeshComponent* Body;
+	//UPROPERTY(VisibleDefaultsOnly, Category = Mesh)
+	//UStaticMeshComponent* Head;
+
+	//UPROPERTY(VisibleDefaultsOnly, Category = Mesh)
+	//class USkeletalMeshComponent* SkeletalMesh;
+
 	UPROPERTY(VisibleDefaultsOnly, Category = Hitbox)
-	UCapsuleComponent* HeadHitbox;
+	class USphereComponent* HeadHitbox;
+
 	UPROPERTY(VisibleDefaultsOnly, Category = Hitbox)
 	UCapsuleComponent* BodyHitbox;
+
 	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = Mesh)
 	USceneComponent* MuzzleLocation;
 

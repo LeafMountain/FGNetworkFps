@@ -15,6 +15,7 @@
 #include "FGGrenade.h"
 #include <Engine/CollisionProfile.h>
 #include <Components/SkeletalMeshComponent.h>
+#include <Components/SphereComponent.h>
 
 
 // Sets default values
@@ -34,20 +35,23 @@ AFGPlayer::AFGPlayer()
 	CameraComponent->SetupAttachment(GetCapsuleComponent());
 	CameraComponent->bUsePawnControlRotation = true;
 
-	Body = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Body"));
-	Body->SetupAttachment(GetCapsuleComponent());
-	Body->SetCollisionProfileName(TEXT("NoCollision"));
+	//Head = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Head"));
+	//Head->SetupAttachment(GetCapsuleComponent());
+	//Head->SetCollisionProfileName(TEXT("NoCollision"));
 
-	Head = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Head"));
-	Head->SetupAttachment(GetCapsuleComponent());
-	Head->SetCollisionProfileName(TEXT("NoCollision"));
+	//SkeletalMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("SkeletalMesh"));
+	////SkeletalMesh->SetOnlyOwnerSee(false);
+	//SkeletalMesh->SetupAttachment(RootComponent);
+	//SkeletalMesh->bCastDynamicShadow = false;
+	//SkeletalMesh->CastShadow = false;
+	//Mesh->SetCollisionProfileName(TEXT("NoCollision"));
 
 	BodyHitbox = CreateDefaultSubobject<UCapsuleComponent>(TEXT("BodyHitBox"));
 	BodyHitbox->SetupAttachment(GetCapsuleComponent());
 	BodyHitbox->SetCollisionProfileName(UCollisionProfile::Pawn_ProfileName);
 
-	HeadHitbox = CreateDefaultSubobject<UCapsuleComponent>(TEXT("HeadHitBox"));
-	HeadHitbox->SetupAttachment(GetCapsuleComponent());
+	HeadHitbox = CreateDefaultSubobject<USphereComponent>(TEXT("HeadHitBox"));
+	HeadHitbox->SetupAttachment(RootComponent);
 	HeadHitbox->SetCollisionProfileName(UCollisionProfile::Pawn_ProfileName);
 
 	Gun = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Gun"));
@@ -89,7 +93,7 @@ void AFGPlayer::FireWeapon()
 	Server_FireWeapon(CameraComponent->GetForwardVector());
 }
 
-void AFGPlayer::Server_FireWeapon_Implementation(FVector ForwardDirection)
+void AFGPlayer::Server_FireWeapon_Implementation(const FVector ForwardDirection)
 {
 	//TODO remake this funktion
 
@@ -118,22 +122,19 @@ void AFGPlayer::Server_FireWeapon_Implementation(FVector ForwardDirection)
 			{
 				GEngine->AddOnScreenDebugMessage(-2, 5, FColor::Red, FString::Printf(TEXT("%s"), *WhatBodyPartHit.Component->GetName()));
 				float FinalDamage = 0;
-				if (WhatBodyPartHit.GetComponent()->GetName() == HitPlayer->BodyHitbox->GetName())
+				if (WhatBodyPartHit.GetComponent() == HitPlayer->BodyHitbox)
 				{
-					//HitPlayer->TakeDamage(WeaponDamage);
 					FinalDamage = WeaponDamage;
 				}
-				else if (WhatBodyPartHit.GetComponent()->GetName() == HitPlayer->HeadHitbox->GetName())
-				{
-					//HitPlayer->TakeDamage(HeadShootDamage);
-					FinalDamage = HeadShootDamage;
-				}
+				//else if (WhatBodyPartHit.GetComponent() == HitPlayer->HeadHitbox)
+				//{
+				//	FinalDamage = HeadShootDamage;
+				//}
 
-				//OnDamageDone.Broadcast(FinalDamage);
-
-				if (HitPlayer->GetComponentByClass(UHealthComponent::StaticClass()))
+				if (UHealthComponent* otherHealth = (UHealthComponent*)HitPlayer->GetComponentByClass(UHealthComponent::StaticClass()))
 				{
-					HitPlayer->TakeDamage(FinalDamage);
+					//HitPlayer->TakeDamage(FinalDamage);
+					otherHealth->TakeDamage(FinalDamage);
 					OnDamageDone(FinalDamage);
 				}
 			}
