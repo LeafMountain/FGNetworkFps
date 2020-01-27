@@ -53,6 +53,7 @@ AFGPlayer::AFGPlayer()
 	HeadHitbox = CreateDefaultSubobject<USphereComponent>(TEXT("HeadHitBox"));
 	HeadHitbox->SetupAttachment(RootComponent);
 	HeadHitbox->SetCollisionProfileName(UCollisionProfile::Pawn_ProfileName);
+	HeadHitbox->SetupAttachment(GetMesh(), FName(TEXT("head")));
 
 	Gun = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Gun"));
 	Gun->SetupAttachment(CameraComponent);
