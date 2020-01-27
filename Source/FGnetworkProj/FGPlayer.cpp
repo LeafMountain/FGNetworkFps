@@ -53,6 +53,7 @@ AFGPlayer::AFGPlayer()
 	HeadHitbox = CreateDefaultSubobject<USphereComponent>(TEXT("HeadHitBox"));
 	HeadHitbox->SetupAttachment(RootComponent);
 	HeadHitbox->SetCollisionProfileName(UCollisionProfile::Pawn_ProfileName);
+	HeadHitbox->SetupAttachment(GetMesh(), FName(TEXT("head")));
 
 	Gun = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Gun"));
 	Gun->SetupAttachment(CameraComponent);
@@ -120,16 +121,16 @@ void AFGPlayer::Server_FireWeapon_Implementation(const FVector ForwardDirection)
 			AFGPlayer* HitPlayer = Cast<AFGPlayer>(Hit.Actor);
 			if (HitPlayer)
 			{
-				GEngine->AddOnScreenDebugMessage(-2, 5, FColor::Red, FString::Printf(TEXT("%s"), *WhatBodyPartHit.Component->GetName()));
+				GEngine->AddOnScreenDebugMessage(-2, 5, FColor::Red, FString::Printf(TEXT("%s"), *WhatBodyPartHit.GetComponent()->GetCollisionProfileName().ToString()));
 				float FinalDamage = 0;
 				if (WhatBodyPartHit.GetComponent() == HitPlayer->BodyHitbox)
 				{
 					FinalDamage = WeaponDamage;
 				}
-				//else if (WhatBodyPartHit.GetComponent() == HitPlayer->HeadHitbox)
-				//{
-				//	FinalDamage = HeadShootDamage;
-				//}
+				else if (WhatBodyPartHit.GetComponent() == HitPlayer->HeadHitbox)
+				{
+					FinalDamage = HeadShootDamage;
+				}
 
 				if (UHealthComponent* otherHealth = (UHealthComponent*)HitPlayer->GetComponentByClass(UHealthComponent::StaticClass()))
 				{

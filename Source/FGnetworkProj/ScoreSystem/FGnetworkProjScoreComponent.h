@@ -9,8 +9,16 @@ class FGNETWORKPROJ_API UFGnetworkProjScoreComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
+protected:
+	void BeginPlay() override;
+
 private:
 	TMap<FString, int> ScoreMap;
+
+	//UPROPERTY(EditDefaultsOnly)
+	//TSubclassOf<class UUserWidget> Widget;
+
+	//class UUserWidget* ScorePanel;
 
 public:
 	UFGnetworkProjScoreComponent();
@@ -23,4 +31,7 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 		int GetScore(const FString key);
+
+	UFUNCTION(BlueprintCallable)
+	void ShowScore();
 };

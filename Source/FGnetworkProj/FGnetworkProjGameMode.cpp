@@ -4,6 +4,7 @@
 #include "FGnetworkProjHUD.h"
 #include "FGnetworkProjCharacter.h"
 #include "UObject/ConstructorHelpers.h"
+#include "ScoreSystem.h"
 
 AFGnetworkProjGameMode::AFGnetworkProjGameMode()
 	: Super()
@@ -14,4 +15,14 @@ AFGnetworkProjGameMode::AFGnetworkProjGameMode()
 
 	// use our custom HUD class
 	HUDClass = AFGnetworkProjHUD::StaticClass();
+}
+
+UScoreSystem* AFGnetworkProjGameMode::GetScoreSystem()
+{
+	if (ScoreSystemPtr == nullptr)
+	{
+		ScoreSystemPtr = CreateDefaultSubobject<UScoreSystem>(TEXT("ScoreSystem"));
+	}
+
+	return ScoreSystemPtr;
 }

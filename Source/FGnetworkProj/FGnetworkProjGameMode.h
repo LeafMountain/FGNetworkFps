@@ -13,6 +13,12 @@ class AFGnetworkProjGameMode : public AGameModeBase
 
 public:
 	AFGnetworkProjGameMode();
+
+private:
+	class UScoreSystem* ScoreSystemPtr;
+
+public:
+	class UScoreSystem* GetScoreSystem();
 };
 
 
