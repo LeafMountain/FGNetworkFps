@@ -1,7 +1,14 @@
 #include "FGnetworkProjScoreComponent.h"
+#include "Blueprint/UserWidget.h"
 
 UFGnetworkProjScoreComponent::UFGnetworkProjScoreComponent()
 {
+	PrimaryComponentTick.bCanEverTick = false;
+}
+
+void UFGnetworkProjScoreComponent::BeginPlay()
+{
+	Super::BeginPlay();
 	PrimaryComponentTick.bCanEverTick = false;
 }
 
@@ -20,4 +27,22 @@ void UFGnetworkProjScoreComponent::AddScore(const FString key, int Value /*= 1*/
 int UFGnetworkProjScoreComponent::GetScore(const FString key)
 {
 	return ScoreMap[key];
+}
+
+void UFGnetworkProjScoreComponent::ShowScore()
+{
+	//if (ScorePanel == nullptr)
+	//{
+	//	ScorePanel = CreateWidget<Widget.Class>(GetWorld(), UUserWidget::StaticClass());
+	//	ScorePanel->AddToViewport(0);
+	//}
+
+	//if (ScorePanel->GetIsVisible())
+	//{
+	//	ScorePanel->SetVisibility(ESlateVisibility::Hidden);
+	//}
+	//else
+	//{
+	//	ScorePanel->SetVisibility(ESlateVisibility::Visible);
+	//}
 }
