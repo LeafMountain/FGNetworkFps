@@ -2,9 +2,20 @@
 
 
 #include "ScoreSystem.h"
+#include "ScoreComponent.h"
 
 UScoreSystem::UScoreSystem()
 {
+}
+
+void UScoreSystem::Initialize(FSubsystemCollectionBase& Collection)
+{
+
+}
+
+void UScoreSystem::Deinitialize()
+{
+
 }
 
 void UScoreSystem::SetScore(const FString name, const FString key, const int value)
@@ -29,21 +40,31 @@ int UScoreSystem::GetScore(const FString name, const FString key)
 
 TArray<FString> UScoreSystem::GetScores(const FString name, const FString key)
 {
-	
-
 	TArray<FString> temp;
-	//TArray<FString, temp> test;
-	TArray<TPair<FString, int>> test;
 
-	/*temp[0].
-
-	ScoreMap[name].GetKeys(test);*/
 	return temp;
 }
 
-TArray<FString> UScoreSystem::GetPlayers()
+TArray<FString> UScoreSystem::GetPlayerNames()
 {
-	TArray<FString> names;
-	ScoreMap.GetKeys(names);
-	return names;
+	TArray<FString> Names;
+
+	for (auto It = ScoreComponents.CreateConstIterator(); It; ++It)
+	{
+		UScoreComponent* ScoreComponent = *It;
+		Names.Add(ScoreComponent->GetName());
+	}
+
+	return Names;
+}
+
+void UScoreSystem::AddScoreComponent(UScoreComponent* Component)
+{
+	ScoreComponents.AddUnique(Component);
+	OnPlayerJoined.Broadcast(Component);
+}
+
+void UScoreSystem::RemoveScoreComponent(UScoreComponent* Component)
+{
+	ScoreComponents.Remove(Component);
 }

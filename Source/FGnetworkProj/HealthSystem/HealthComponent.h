@@ -49,6 +49,9 @@ protected:
 	UPROPERTY(EditAnywhere)
 	float InitialHealth = 1.f;
 
+	UFUNCTION(BlueprintPure, Category = "Health")
+	float GetHealthPercentage();
+
 public:	
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 		

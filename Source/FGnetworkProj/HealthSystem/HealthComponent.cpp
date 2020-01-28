@@ -28,6 +28,11 @@ void UHealthComponent::BeginPlay()
 	CurrentHealth = InitialHealth;
 }
 
+float UHealthComponent::GetHealthPercentage()
+{
+	return CurrentHealth / InitialHealth;
+}
+
 void UHealthComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
