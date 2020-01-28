@@ -14,7 +14,7 @@ AFGGrenade::AFGGrenade()
 	Mesh->SetSimulatePhysics(true);
 
 	Collider = CreateDefaultSubobject<USphereComponent>(TEXT("Collider"));   
-    Collider->SetSphereRadius(100);
+    Collider->SetSphereRadius(DamageRadius);
 	Collider->bHiddenInGame = false;
 
 	RootComponent = Mesh;
@@ -34,6 +34,38 @@ void AFGGrenade::Tick(float DeltaTime)
 	}
 }
 
+void AFGGrenade::Explode()
+{
+	Multicast_Explosion();
+
+	if (GetOwner()->Role == ROLE_Authority)
+	{
+		Collider->GetOverlappingActors(OverlappingActors);
+		for (int i = 0; i < OverlappingActors.Num(); i++)
+		{
+			UHealthComponent* PlayerHealth = Cast<UHealthComponent>(OverlappingActors[i]->GetComponentByClass(UHealthComponent::StaticClass()));
+			if (PlayerHealth != nullptr)
+			{
+				PlayerHealth->TakeDamage(Damage);
+			}
+
+			UStaticMeshComponent* MeshComp = Cast<UStaticMeshComponent>((OverlappingActors[i]->GetRootComponent()));
+			if (MeshComp != Mesh && MeshComp)
+			{
+				Multicast_PushBack(MeshComp);
+			}
+		}
+	}
+
+    Destroy();
+}
+
+void AFGGrenade::ThrowGrenade(FVector ThrowDirection)
+{
+	Mesh->AddImpulse(ThrowDirection * ThrowForce);
+	GetWorldTimerManager().SetTimer(ExplosionTimer, this, &AFGGrenade::Explode, ExplosionDelay, false);
+}
+
 void AFGGrenade::Multicast_Explosion_Implementation()
 {
 	BP_Explosion();
@@ -49,30 +81,7 @@ void AFGGrenade::Multicast_UpdatePosition_Implementation(FVector Position)
 	SetActorLocation(Position);
 }
 
-void AFGGrenade::Explode()
+void AFGGrenade::Multicast_PushBack_Implementation(UStaticMeshComponent * MeshComponent)
 {
-	Multicast_Explosion();
-
-	if (GetOwner()->Role == ROLE_Authority)
-	{
-		Collider->GetOverlappingActors(OverlappingActors);
-
-		for (int i = 0; i < OverlappingActors.Num(); i++)
-		{
-			UHealthComponent* PlayerHealth = Cast<UHealthComponent>(OverlappingActors[i]->GetComponentByClass(UHealthComponent::StaticClass()));
-			if (PlayerHealth != nullptr)
-			{
-				PlayerHealth->TakeDamage(Damage);
-			}
-		}
-	}
-
-    Destroy();
-}
-
-
-void AFGGrenade::ThrowGrenade(FVector ThrowDirection)
-{
-	Mesh->AddImpulse(ThrowDirection * ThrowForce);
-	GetWorldTimerManager().SetTimer(ExplosionTimer, this, &AFGGrenade::Explode, ExplosionDelay, false);
+	MeshComponent->AddRadialImpulse(GetActorLocation(), PushBackRadius, PushBackForce, ERadialImpulseFalloff::RIF_Linear, true);
 }

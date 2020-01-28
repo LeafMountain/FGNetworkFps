@@ -34,6 +34,9 @@ protected:
 	USphereComponent* Collider;
 
 	UPROPERTY(EditAnywhere)
+	float DamageRadius = 100;
+
+	UPROPERTY(EditAnywhere)
 	float ExplosionDelay = 3;
 
 	UPROPERTY(EditAnywhere)
@@ -41,6 +44,12 @@ protected:
 
     UPROPERTY(EditAnywhere)
     float ThrowForce = 5000;
+
+	UPROPERTY(EditAnywhere)
+	float PushBackRadius = 500;
+
+	UPROPERTY(EditAnywhere)
+	float PushBackForce = 1000;
 
 	FTimerHandle ExplosionTimer;
 
@@ -50,6 +59,9 @@ protected:
 	void BP_Explosion();
 
 	TArray<AActor*> OverlappingActors;
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_PushBack(UStaticMeshComponent* MeshComponent);
 
 public:
 	void ThrowGrenade(FVector ThrowDirection);
