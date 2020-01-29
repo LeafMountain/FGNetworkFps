@@ -121,7 +121,7 @@ public:
 
 	void LookUpAtRate(float Rate);
 
-	void TakeDamage(float Damage);
+	void TakeSomeDamage(float Damage);
 
 	void ThrowGrenade();
 

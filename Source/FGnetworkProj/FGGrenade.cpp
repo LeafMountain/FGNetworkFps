@@ -28,7 +28,7 @@ void AFGGrenade::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (GetOwner()->Role == ROLE_Authority)
+	if (GetOwner()->GetLocalRole() == ROLE_Authority)
 	{
 		Multicast_UpdatePosition(GetActorLocation());
 	}
@@ -38,7 +38,7 @@ void AFGGrenade::Explode()
 {
 	Multicast_Explosion();
 
-	if (GetOwner()->Role == ROLE_Authority)
+	if (GetOwner()->GetLocalRole() == ROLE_Authority)
 	{
 		Collider->GetOverlappingActors(OverlappingActors);
 		for (int i = 0; i < OverlappingActors.Num(); i++)

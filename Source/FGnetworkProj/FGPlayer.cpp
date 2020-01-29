@@ -72,7 +72,7 @@ void AFGPlayer::Server_UpdateCameraRotation_Implementation(float Rate)
 
 void AFGPlayer::Multicast_UppdateCameraRotation_Implementation(float Rate)
 {
-	if (Role == ROLE_Authority || Role == ROLE_SimulatedProxy)
+	if (GetLocalRole() == ROLE_Authority || GetLocalRole() == ROLE_SimulatedProxy)
 	{
 		AddControllerPitchInput(Rate * BaseLookUpRate * GetWorld()->GetDeltaSeconds());
 	}
@@ -144,7 +144,7 @@ void AFGPlayer::Multicast_FireWeapon_Implementation(FHitResult Hit)
 	//TODO make weapon fire visuals here
 	//DrawDebugLine(GetWorld(), GetActorLocation(),GetActorLocation() + CameraComponent->GetForwardVector()*WeaponRange, FColor::Purple, false, 1, 0, 1);
 
-	if (Role == ROLE_Authority)
+	if (GetLocalRole() == ROLE_Authority)
 	{
 		return;
 	}
@@ -159,7 +159,7 @@ void AFGPlayer::Tick(float DeltaTime)
 
 	if (IsLocallyControlled())
 	{
-		if (Role == ROLE_Authority)
+		if (GetLocalRole() == ROLE_Authority)
 		{
 			Multicast_UpdatePositionAndRotation(GetActorRotation(), GetActorLocation(), DeltaTime);
 		}
@@ -218,7 +218,7 @@ void AFGPlayer::LookUpAtRate(float Rate)
 
 	if (IsLocallyControlled())
 	{
-		if (ROLE_Authority)
+		if ( GetLocalRole() == ROLE_Authority)
 		{
 			Multicast_UppdateCameraRotation(Rate);
 		}
@@ -227,7 +227,7 @@ void AFGPlayer::LookUpAtRate(float Rate)
 	}
 }
 
-void AFGPlayer::TakeDamage(float Damage)
+void AFGPlayer::TakeSomeDamage(float Damage)
 {
 	//HealthComponent->TakeDamage(Damage);
 }
@@ -251,7 +251,7 @@ void AFGPlayer::Server_ThrowGrenade_Implementation(FVector ThrowDirection)
 
 void AFGPlayer::Multicast_ThrowGrenade_Implementation(FVector ThrowDirection)
 {
-	if (Role != ROLE_Authority)
+	if (GetLocalRole() != ROLE_Authority)
 		return;
 
 	FActorSpawnParameters SpawnParams;
@@ -273,7 +273,7 @@ void AFGPlayer::Server_UpdatePositionAndRotation_Implementation(FRotator Rotatio
 
 void AFGPlayer::Multicast_UpdatePositionAndRotation_Implementation(FRotator Rotation, FVector Location, float DeltaTime)
 {
-	if (Role == ROLE_Authority || Role == ROLE_SimulatedProxy)
+	if (GetLocalRole() == ROLE_Authority || GetLocalRole() == ROLE_SimulatedProxy)
 	{
 		SetActorRotation(FMath::RInterpTo(GetActorRotation(), Rotation, DeltaTime, InterpSpeed));
 		SetActorLocation(FMath::VInterpTo(GetActorLocation(), Location, DeltaTime, InterpSpeed));
