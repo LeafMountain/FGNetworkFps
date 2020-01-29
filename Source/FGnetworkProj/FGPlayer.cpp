@@ -35,33 +35,28 @@ AFGPlayer::AFGPlayer()
 	CameraComponent->SetupAttachment(GetCapsuleComponent());
 	CameraComponent->bUsePawnControlRotation = true;
 
-	//Head = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Head"));
-	//Head->SetupAttachment(GetCapsuleComponent());
-	//Head->SetCollisionProfileName(TEXT("NoCollision"));
-
-	//SkeletalMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("SkeletalMesh"));
-	////SkeletalMesh->SetOnlyOwnerSee(false);
-	//SkeletalMesh->SetupAttachment(RootComponent);
-	//SkeletalMesh->bCastDynamicShadow = false;
-	//SkeletalMesh->CastShadow = false;
-	//Mesh->SetCollisionProfileName(TEXT("NoCollision"));
-
 	BodyHitbox = CreateDefaultSubobject<UCapsuleComponent>(TEXT("BodyHitBox"));
 	BodyHitbox->SetupAttachment(GetCapsuleComponent());
 	BodyHitbox->SetCollisionProfileName(UCollisionProfile::Pawn_ProfileName);
+	BodyHitbox->SetRelativeLocation(FVector(0.f, 0.f, -7.f));
+	BodyHitbox->SetCapsuleHalfHeight(62.f);
 
 	HeadHitbox = CreateDefaultSubobject<USphereComponent>(TEXT("HeadHitBox"));
 	HeadHitbox->SetupAttachment(RootComponent);
 	HeadHitbox->SetCollisionProfileName(UCollisionProfile::Pawn_ProfileName);
 	HeadHitbox->SetupAttachment(GetMesh(), FName(TEXT("head")));
+	HeadHitbox->SetRelativeLocation(FVector(0.f, 0.f, 160.f));
+	HeadHitbox->SetSphereRadius(17.f);
 
 	Gun = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Gun"));
 	Gun->SetupAttachment(CameraComponent);
 	Gun->SetCollisionProfileName(TEXT("NoCollision"));
+	Gun->SetRelativeLocation(FVector(7.f, 0.f,-34.f));
+	Gun->SetRelativeRotation(FRotator(0.f, 0.f, 90.f));
 
 	MuzzleLocation = CreateDefaultSubobject<USceneComponent>(TEXT("MuzzleLocation"));
 	MuzzleLocation->SetupAttachment(Gun);
-	MuzzleLocation->SetRelativeLocation(FVector(0.2f, 48.4f, -10.6f));
+	MuzzleLocation->SetRelativeLocation(FVector(0.f, 60.f, 11.f));
 
 	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
 
@@ -96,7 +91,7 @@ void AFGPlayer::FireWeapon()
 
 void AFGPlayer::Server_FireWeapon_Implementation(const FVector ForwardDirection)
 {
-	//TODO remake this funktion
+	//TODO remake this function
 
 	FHitResult Hit;
 	FCollisionQueryParams CollisionParams;
@@ -115,7 +110,7 @@ void AFGPlayer::Server_FireWeapon_Implementation(const FVector ForwardDirection)
 		Cp.AddIgnoredActor(this);
 		Cp.AddIgnoredComponent(Hit.GetComponent());
 
-		if (GetWorld()->LineTraceSingleByChannel(WhatBodyPartHit, GetActorLocation(),
+		if (GetWorld()->LineTraceSingleByChannel(WhatBodyPartHit, CameraComponent->GetComponentLocation(),
 			GetActorLocation() + ForwardDirection * WeaponRange, ECC_Pawn, Cp))
 		{
 			AFGPlayer* HitPlayer = Cast<AFGPlayer>(Hit.Actor);
