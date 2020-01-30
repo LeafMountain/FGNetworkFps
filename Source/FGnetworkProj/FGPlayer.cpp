@@ -16,6 +16,7 @@
 #include <Engine/CollisionProfile.h>
 #include <Components/SkeletalMeshComponent.h>
 #include <Components/SphereComponent.h>
+#include <GameFramework/SpringArmComponent.h>
 
 
 // Sets default values
@@ -31,8 +32,12 @@ AFGPlayer::AFGPlayer()
 
 	CurrentAmountGrenades = MaxAmountGrenades;
 
+	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
+	SpringArm->TargetArmLength = 0;
+	SpringArm->SetupAttachment(RootComponent);
+
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
-	CameraComponent->SetupAttachment(GetCapsuleComponent());
+	CameraComponent->SetupAttachment(SpringArm);
 	CameraComponent->bUsePawnControlRotation = true;
 
 	BodyHitbox = CreateDefaultSubobject<UCapsuleComponent>(TEXT("BodyHitBox"));
@@ -81,7 +86,9 @@ void AFGPlayer::Multicast_UppdateCameraRotation_Implementation(float Rate)
 void AFGPlayer::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
+	if (IsLocallyControlled())
+		GetMesh()->SetVisibility(false);
 }
 
 void AFGPlayer::FireWeapon()
@@ -263,7 +270,33 @@ void AFGPlayer::Multicast_ThrowGrenade_Implementation(FVector ThrowDirection)
 
 void AFGPlayer::Die()
 {
-	RespawnComponent->RespawnPlayer(this);
+	Multicast_Death();
+
+	if (IsLocallyControlled())
+	{
+		SpringArm->TargetArmLength = 600;
+
+		GetMesh()->SetVisibility(true);
+		Gun->SetVisibility(false);
+		DisableInput(Cast<APlayerController>(GetController()));
+
+		GetCapsuleComponent()->SetCollisionProfileName(TEXT("NoCollision"));
+		HeadHitbox->SetCollisionProfileName(TEXT("NoCollision"));
+		BodyHitbox->SetCollisionProfileName(TEXT("NoCollision"));
+
+		SetActorEnableCollision(false);
+	}
+
+	//RespawnComponent->RespawnPlayer(this);
+}
+
+void AFGPlayer::Multicast_Death_Implementation()
+{
+	GetMesh()->PlayAnimation(DeathAnim, false);
+
+	//PlayAnimMontage(DeathAnimMontage);
+
+	Gun->SetVisibility(false);
 }
 
 void AFGPlayer::Server_UpdatePositionAndRotation_Implementation(FRotator Rotation, FVector Location, float DeltaTime)

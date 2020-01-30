@@ -92,6 +92,18 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = Projectile)
 	TSubclassOf<AFGGrenade> Grenades;
 
+	UPROPERTY()
+	class USpringArmComponent* SpringArm = nullptr;
+
+	UPROPERTY(EditDefaultsOnly, Category = Animation)
+	class UAnimationAsset* DeathAnim;
+
+	UPROPERTY(EditDefaultsOnly, Category = Animation)
+	class UAnimMontage* DeathAnimMontage;
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_Death();
+
     UFUNCTION(Server, Reliable)
     void Server_ThrowGrenade(FVector ThrowDirection);
 
