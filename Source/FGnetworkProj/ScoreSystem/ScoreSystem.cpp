@@ -3,6 +3,7 @@
 
 #include "ScoreSystem.h"
 #include "ScoreComponent.h"
+#include <Engine/Engine.h>
 
 UScoreSystem::UScoreSystem()
 {
@@ -10,12 +11,12 @@ UScoreSystem::UScoreSystem()
 
 void UScoreSystem::Initialize(FSubsystemCollectionBase& Collection)
 {
-
+	Super::Initialize(Collection);
 }
 
 void UScoreSystem::Deinitialize()
 {
-
+	Super::Deinitialize();
 }
 
 void UScoreSystem::SetScore(const FString name, const FString key, const int value)
@@ -60,8 +61,12 @@ TArray<FString> UScoreSystem::GetPlayerNames()
 
 void UScoreSystem::AddScoreComponent(UScoreComponent* Component)
 {
-	ScoreComponents.AddUnique(Component);
-	OnPlayerJoined.Broadcast(Component);
+	if (ScoreComponents.Contains(Component) == false)
+	{
+		GEngine->AddOnScreenDebugMessage(-2, 5.0f, FColor::Green, FString::Printf(TEXT("%s joined the game."), *Component->GetName()));
+		ScoreComponents.Add(Component);
+		OnPlayerJoined.Broadcast(Component);
+	}
 }
 
 void UScoreSystem::RemoveScoreComponent(UScoreComponent* Component)

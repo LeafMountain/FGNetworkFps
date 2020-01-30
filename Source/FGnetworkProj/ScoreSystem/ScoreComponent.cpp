@@ -11,23 +11,25 @@ UScoreComponent::UScoreComponent()
 void UScoreComponent::BeginPlay()
 {
 	Super::BeginPlay();
-	PrimaryComponentTick.bCanEverTick = false;
 
-	if (Name.IsEmpty())
+	ENetRole role = GetOwner()->GetLocalRole();
+
+	if (Name.IsEmpty() && GetOwner()->GetLocalRole() == ENetRole::ROLE_AutonomousProxy)
 	{
 		FString TempName = TEXT("Name#");
 		TempName.AppendInt(FMath::RandRange(0, 9999));
 		SetName(TempName);
+		UE_LOG(LogTemp, Warning, TEXT("Player assigned name: %s"), *TempName);
+
+		ScoreSystem = GetWorld()->GetGameInstance()->GetSubsystem<UScoreSystem>();
+		ScoreSystem->AddScoreComponent(this);
 	}
-
-	ScoreSystem = GetWorld()->GetGameInstance()->GetSubsystem<UScoreSystem>();
-	ScoreSystem->AddScoreComponent(this);
-
 }
 
 void UScoreComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	ScoreSystem->RemoveScoreComponent(this);
+
 	Super::EndPlay(EndPlayReason);
 }
 
