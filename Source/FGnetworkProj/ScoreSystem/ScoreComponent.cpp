@@ -28,9 +28,9 @@ void UScoreComponent::BeginPlay()
 
 void UScoreComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
-	ScoreSystem->RemoveScoreComponent(this);
+	//ScoreSystem->RemoveScoreComponent(this);
 
-	Super::EndPlay(EndPlayReason);
+	//Super::EndPlay(EndPlayReason);
 }
 
 void UScoreComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const

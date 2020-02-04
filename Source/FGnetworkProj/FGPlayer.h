@@ -115,6 +115,8 @@ protected:
 
 	int CurrentAmountGrenades;
 
+	FTimerHandle RespawnTimer;
+
 public:
 
 	void FireWeapon();
@@ -138,6 +140,8 @@ public:
 	void ThrowGrenade();
 
 	void Die();
+
+	void Respawn();
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void OnDamageDone(float Value);

@@ -17,6 +17,7 @@
 #include <Components/SkeletalMeshComponent.h>
 #include <Components/SphereComponent.h>
 #include <GameFramework/SpringArmComponent.h>
+#include <Engine/World.h>
 
 
 // Sets default values
@@ -279,24 +280,28 @@ void AFGPlayer::Die()
 		GetMesh()->SetVisibility(true);
 		Gun->SetVisibility(false);
 		DisableInput(Cast<APlayerController>(GetController()));
-
-		GetCapsuleComponent()->SetCollisionProfileName(TEXT("NoCollision"));
-		HeadHitbox->SetCollisionProfileName(TEXT("NoCollision"));
-		BodyHitbox->SetCollisionProfileName(TEXT("NoCollision"));
-
-		SetActorEnableCollision(false);
 	}
+}
 
-	//RespawnComponent->RespawnPlayer(this);
+void AFGPlayer::Respawn()
+{
+	SpringArm->TargetArmLength = 0;
+	SetActorEnableCollision(true);
+	Gun->SetVisibility(true);
+	EnableInput(Cast<APlayerController>(GetController()));
+	RespawnComponent->RespawnPlayer(this);
+	CurrentAmountGrenades = MaxAmountGrenades;
 }
 
 void AFGPlayer::Multicast_Death_Implementation()
 {
 	GetMesh()->PlayAnimation(DeathAnim, false);
+	SetActorEnableCollision(false);
+	Gun->SetVisibility(false);
 
 	//PlayAnimMontage(DeathAnimMontage);
 
-	Gun->SetVisibility(false);
+	GetWorldTimerManager().SetTimer(RespawnTimer, this, &AFGPlayer::Respawn, 5.f, false);
 }
 
 void AFGPlayer::Server_UpdatePositionAndRotation_Implementation(FRotator Rotation, FVector Location, float DeltaTime)
@@ -310,6 +315,5 @@ void AFGPlayer::Multicast_UpdatePositionAndRotation_Implementation(FRotator Rota
 	{
 		SetActorRotation(FMath::RInterpTo(GetActorRotation(), Rotation, DeltaTime, InterpSpeed));
 		SetActorLocation(FMath::VInterpTo(GetActorLocation(), Location, DeltaTime, InterpSpeed));
-		
 	}
 }
