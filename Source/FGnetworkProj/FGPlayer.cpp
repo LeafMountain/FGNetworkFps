@@ -291,6 +291,11 @@ void AFGPlayer::Respawn()
 	EnableInput(Cast<APlayerController>(GetController()));
 	RespawnComponent->RespawnPlayer(this);
 	CurrentAmountGrenades = MaxAmountGrenades;
+
+	GetMesh()->PlayAnimation(IdleAnim, false);
+
+	if (IsLocallyControlled())
+		GetMesh()->SetVisibility(false);
 }
 
 void AFGPlayer::Multicast_Death_Implementation()

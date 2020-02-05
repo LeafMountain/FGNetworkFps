@@ -99,6 +99,9 @@ protected:
 	class UAnimationAsset* DeathAnim;
 
 	UPROPERTY(EditDefaultsOnly, Category = Animation)
+	class UAnimationAsset* IdleAnim;
+
+	UPROPERTY(EditDefaultsOnly, Category = Animation)
 	class UAnimMontage* DeathAnimMontage;
 
 	UFUNCTION(NetMulticast, Reliable)
