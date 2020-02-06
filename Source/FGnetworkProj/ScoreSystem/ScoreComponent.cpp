@@ -6,6 +6,8 @@
 UScoreComponent::UScoreComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
+	bReplicates = true;
+	SetIsReplicated(true);
 }
 
 void UScoreComponent::BeginPlay()
@@ -28,9 +30,12 @@ void UScoreComponent::BeginPlay()
 
 void UScoreComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
-	//ScoreSystem->RemoveScoreComponent(this);
+	if (ScoreSystem != nullptr)
+	{
+		ScoreSystem->RemoveScoreComponent(this);
+	}
 
-	//Super::EndPlay(EndPlayReason);
+	Super::EndPlay(EndPlayReason);
 }
 
 void UScoreComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -77,7 +82,8 @@ void UScoreComponent::ShowScore()
 
 void UScoreComponent::SetName(const FString& NewName)
 {
-	Multicast_SetName(NewName);
+	Name = NewName;
+	Server_SetName(NewName);
 }
 
 void UScoreComponent::Server_SetName_Implementation(const FString& NewName)
@@ -87,5 +93,8 @@ void UScoreComponent::Server_SetName_Implementation(const FString& NewName)
 
 void UScoreComponent::Multicast_SetName_Implementation(const FString& NewName)
 {
-	Name = NewName;
+	if (GetOwnerRole() == ROLE_Authority || GetOwnerRole() == ROLE_SimulatedProxy)
+	{
+		Name = NewName;
+	}
 }

@@ -63,7 +63,7 @@ void UScoreSystem::AddScoreComponent(UScoreComponent* Component)
 {
 	if (ScoreComponents.Contains(Component) == false)
 	{
-		GEngine->AddOnScreenDebugMessage(-2, 5.0f, FColor::Green, FString::Printf(TEXT("%s joined the game."), *Component->GetName()));
+		GEngine->AddOnScreenDebugMessage(-2, 10.0f, FColor::Green, FString::Printf(TEXT("%s joined the game."), *Component->GetName()));
 		ScoreComponents.Add(Component);
 		OnPlayerJoined.Broadcast(Component);
 	}
