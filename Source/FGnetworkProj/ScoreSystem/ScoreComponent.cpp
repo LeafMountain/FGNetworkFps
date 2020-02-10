@@ -2,11 +2,11 @@
 #include "Blueprint/UserWidget.h"
 #include "ScoreSystem.h"
 #include "Net/UnrealNetwork.h"
+#include <Engine/Engine.h>
 
 UScoreComponent::UScoreComponent()
 {
-	PrimaryComponentTick.bCanEverTick = false;
-	bReplicates = true;
+	PrimaryComponentTick.bCanEverTick = true;
 	SetIsReplicated(true);
 }
 
@@ -16,16 +16,13 @@ void UScoreComponent::BeginPlay()
 
 	ENetRole role = GetOwner()->GetLocalRole();
 
-	if (Name.IsEmpty() && GetOwner()->GetLocalRole() == ENetRole::ROLE_AutonomousProxy)
+	if (GetOwner()->GetLocalRole() == ENetRole::ROLE_AutonomousProxy)
 	{
-		FString TempName = TEXT("Name#");
-		TempName.AppendInt(FMath::RandRange(0, 9999));
-		SetName(TempName);
-		UE_LOG(LogTemp, Warning, TEXT("Player assigned name: %s"), *TempName);
-
 		ScoreSystem = GetWorld()->GetGameInstance()->GetSubsystem<UScoreSystem>();
 		ScoreSystem->AddScoreComponent(this);
 	}
+
+	GetPlayerIndex();
 }
 
 void UScoreComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -42,7 +39,16 @@ void UScoreComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutL
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(UScoreComponent, Name);
+	DOREPLIFETIME( UScoreComponent, Name);
+	DOREPLIFETIME( UScoreComponent, PlayerNetIndex );
+	DOREPLIFETIME( UScoreComponent, PlayerCount );
+}
+
+void UScoreComponent::TickComponent( float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction )
+{
+	Super::TickComponent( DeltaTime, TickType, ThisTickFunction );
+
+	GEngine->AddOnScreenDebugMessage( PlayerNetIndex, 0, FColor::Red, FString::Printf( TEXT( "%s score: %i" ), *Name, GetScore("kills") ));
 }
 
 void UScoreComponent::SetScore(const FString key, const int value)
@@ -52,32 +58,18 @@ void UScoreComponent::SetScore(const FString key, const int value)
 
 void UScoreComponent::AddScore(const FString key, int Value /*= 1*/)
 {
-	// Score Map might not have that value
 	int OldScore = ScoreMap.Contains(key) ? ScoreMap[key] : 0;
 	ScoreMap.Add(key, OldScore + Value);
 }
 
 int UScoreComponent::GetScore(const FString key)
 {
-	return ScoreMap[key];
-}
+	if ( ScoreMap.Contains( key ) )
+	{
+		return ScoreMap[key];
+	}
 
-void UScoreComponent::ShowScore()
-{
-	//if (ScorePanel == nullptr)
-	//{
-	//	ScorePanel = CreateWidget<Widget.Class>(GetWorld(), UUserWidget::StaticClass());
-	//	ScorePanel->AddToViewport(0);
-	//}
-
-	//if (ScorePanel->GetIsVisible())
-	//{
-	//	ScorePanel->SetVisibility(ESlateVisibility::Hidden);
-	//}
-	//else
-	//{
-	//	ScorePanel->SetVisibility(ESlateVisibility::Visible);
-	//}
+	return 0;
 }
 
 void UScoreComponent::SetName(const FString& NewName)
@@ -97,4 +89,22 @@ void UScoreComponent::Multicast_SetName_Implementation(const FString& NewName)
 	{
 		Name = NewName;
 	}
+}
+
+void UScoreComponent::GetPlayerIndex()
+{
+	Server_GetPlayerIndex();
+}
+
+void UScoreComponent::Multicast_GetPlayerIndex_Implementation( int IndexFromServer )
+{
+	PlayerNetIndex = IndexFromServer;
+	PlayerCount = IndexFromServer;
+	SetName( FString::Printf( TEXT( "Player#%i" ), PlayerNetIndex ));
+}
+
+void UScoreComponent::Server_GetPlayerIndex_Implementation()
+{
+	PlayerCount += 1;
+	Multicast_GetPlayerIndex(PlayerCount);
 }

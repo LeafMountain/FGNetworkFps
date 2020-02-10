@@ -17,6 +17,9 @@ public:
 	// Sets default values for this component's properties
 	UHealthComponent();
 
+	UFUNCTION(BlueprintPure)
+	float GetHealth();
+
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
@@ -40,8 +43,6 @@ protected:
 	void MulticastResetHealth();
 	void MulticastResetHealth_Implementation();
 
-	UFUNCTION(BlueprintPure)
-	float GetHealth();
 
 	UFUNCTION()
 	void LowerHealth(float Value);

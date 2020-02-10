@@ -18,7 +18,7 @@
 #include <Components/SphereComponent.h>
 #include <GameFramework/SpringArmComponent.h>
 #include <Engine/World.h>
-
+#include "ScoreSystem/ScoreComponent.h"
 
 // Sets default values
 AFGPlayer::AFGPlayer()
@@ -68,6 +68,8 @@ AFGPlayer::AFGPlayer()
 
 	RespawnComponent = CreateDefaultSubobject<URespawnComponent>(TEXT("RespawnComponent"));
 
+	ScoreComponent = CreateDefaultSubobject<UScoreComponent>( TEXT( "Score Component" ));
+
 	SetReplicateMovement(false);
 }
 
@@ -94,10 +96,13 @@ void AFGPlayer::BeginPlay()
 
 void AFGPlayer::FireWeapon()
 {
-	Server_FireWeapon(CameraComponent->GetForwardVector());
+	if ( ScoreComponent != nullptr )
+	{
+		Server_FireWeapon(CameraComponent->GetForwardVector(), ScoreComponent->GetName());
+	}
 }
 
-void AFGPlayer::Server_FireWeapon_Implementation(const FVector ForwardDirection)
+void AFGPlayer::Server_FireWeapon_Implementation(const FVector ForwardDirection, const FString& PlayerName)
 {
 	//TODO remake this function
 
@@ -140,14 +145,18 @@ void AFGPlayer::Server_FireWeapon_Implementation(const FVector ForwardDirection)
 					//HitPlayer->TakeDamage(FinalDamage);
 					otherHealth->TakeDamage(FinalDamage);
 					OnDamageDone(FinalDamage);
+					if ( otherHealth->GetHealth() <= 0 )
+					{
+						ScoreComponent->AddScore( "kills" );
+					}
 				}
 			}
 		}
-		Multicast_FireWeapon(Hit);
+		Multicast_FireWeapon(Hit, TEXT("TempName"));
 	}
 }
 
-void AFGPlayer::Multicast_FireWeapon_Implementation(FHitResult Hit)
+void AFGPlayer::Multicast_FireWeapon_Implementation(FHitResult Hit, const FString& Name)
 {
 	//TODO make weapon fire visuals here
 	//DrawDebugLine(GetWorld(), GetActorLocation(),GetActorLocation() + CameraComponent->GetForwardVector()*WeaponRange, FColor::Purple, false, 1, 0, 1);

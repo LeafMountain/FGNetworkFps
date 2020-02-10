@@ -56,6 +56,9 @@ public:
 	UPROPERTY(BlueprintReadOnly, VisibleDefaultsOnly, Category = Mesh)
 	USceneComponent* MuzzleLocation;
 
+	UPROPERTY()
+	class UScoreComponent* ScoreComponent;
+
 protected:
 
 	UFUNCTION(BlueprintImplementableEvent)
@@ -77,10 +80,10 @@ protected:
 	void Multicast_UpdatePositionAndRotation(FRotator Rotation, FVector Location, float DeltaTime);
 
 	UFUNCTION(Server, Reliable)
-	void Server_FireWeapon(FVector ForwardDirection);
+	void Server_FireWeapon(FVector ForwardDirection, const FString& Name);
 
 	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_FireWeapon(FHitResult Hit);
+	void Multicast_FireWeapon(FHitResult Hit, const FString& Name);
 
 	virtual void BeginPlay() override;
 	UPROPERTY(VisibleDefaultsOnly, Category = CameraComponent)
