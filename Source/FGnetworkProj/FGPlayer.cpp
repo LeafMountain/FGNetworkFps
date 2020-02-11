@@ -19,6 +19,7 @@
 #include <GameFramework/SpringArmComponent.h>
 #include <Engine/World.h>
 #include "ScoreSystem/ScoreComponent.h"
+#include <EngineUtils.h>
 
 // Sets default values
 AFGPlayer::AFGPlayer()
@@ -26,7 +27,8 @@ AFGPlayer::AFGPlayer()
 	BaseTurnRate = 45.f;
 	BaseLookUpRate = 45.f;
  	
-	bReplicates = true;
+	//bReplicates = true;
+	SetReplicates( true );
 	PrimaryActorTick.bCanEverTick = true;
 
 	RootComponent = GetCapsuleComponent();
@@ -102,9 +104,10 @@ void AFGPlayer::FireWeapon()
 	}
 }
 
-void AFGPlayer::Server_FireWeapon_Implementation(const FVector ForwardDirection, const FString& PlayerName)
+void AFGPlayer::Server_FireWeapon_Implementation(const FVector ForwardDirection, const FString& Instagator)
 {
 	//TODO remake this function
+	FString Target;
 
 	FHitResult Hit;
 	FCollisionQueryParams CollisionParams;
@@ -142,21 +145,17 @@ void AFGPlayer::Server_FireWeapon_Implementation(const FVector ForwardDirection,
 
 				if (UHealthComponent* otherHealth = (UHealthComponent*)HitPlayer->GetComponentByClass(UHealthComponent::StaticClass()))
 				{
-					//HitPlayer->TakeDamage(FinalDamage);
 					otherHealth->TakeDamage(FinalDamage);
 					OnDamageDone(FinalDamage);
-					if ( otherHealth->GetHealth() <= 0 )
-					{
-						ScoreComponent->AddScore( "kills" );
-					}
+					Target = HitPlayer->ScoreComponent->GetName();
 				}
 			}
 		}
-		Multicast_FireWeapon(Hit, TEXT("TempName"));
+		Multicast_FireWeapon(Hit, Instagator, Target);
 	}
 }
 
-void AFGPlayer::Multicast_FireWeapon_Implementation(FHitResult Hit, const FString& Name)
+void AFGPlayer::Multicast_FireWeapon_Implementation(FHitResult Hit, const FString& Instagator, const FString& Target)
 {
 	//TODO make weapon fire visuals here
 	//DrawDebugLine(GetWorld(), GetActorLocation(),GetActorLocation() + CameraComponent->GetForwardVector()*WeaponRange, FColor::Purple, false, 1, 0, 1);
@@ -168,6 +167,23 @@ void AFGPlayer::Multicast_FireWeapon_Implementation(FHitResult Hit, const FStrin
 
 	BP_MuzzleFlash();
 	BP_HitLocation(Hit);
+
+
+	// Check if a player was killed. Might be better to do at the server side
+	if ( ScoreComponent->GetName().Equals(Instagator, ESearchCase::IgnoreCase))
+	{
+		for (TActorIterator<AFGPlayer> It(GetWorld()); It; ++It)
+		{
+			AFGPlayer* OtherPlayer = *It;
+			if ( OtherPlayer 
+				 && OtherPlayer->ScoreComponent->GetName().Equals(Target, ESearchCase::IgnoreCase) 
+				 && OtherPlayer->HealthComponent 
+				 && OtherPlayer->HealthComponent->GetHealth() <= 0)
+			{
+				ScoreComponent->AddScore( "kills" );
+			}
+		}
+	}
 }
 
 void AFGPlayer::Tick(float DeltaTime)

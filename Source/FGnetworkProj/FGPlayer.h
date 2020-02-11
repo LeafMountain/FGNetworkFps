@@ -59,6 +59,9 @@ public:
 	UPROPERTY()
 	class UScoreComponent* ScoreComponent;
 
+	UPROPERTY(VisibleDefaultsOnly)
+	UHealthComponent* HealthComponent;
+
 protected:
 
 	UFUNCTION(BlueprintImplementableEvent)
@@ -80,16 +83,14 @@ protected:
 	void Multicast_UpdatePositionAndRotation(FRotator Rotation, FVector Location, float DeltaTime);
 
 	UFUNCTION(Server, Reliable)
-	void Server_FireWeapon(FVector ForwardDirection, const FString& Name);
+	void Server_FireWeapon(FVector ForwardDirection, const FString& Instagator);
 
 	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_FireWeapon(FHitResult Hit, const FString& Name);
+	void Multicast_FireWeapon(FHitResult Hit, const FString& Instagator, const FString& Target);
 
 	virtual void BeginPlay() override;
 	UPROPERTY(VisibleDefaultsOnly, Category = CameraComponent)
 	UCameraComponent* CameraComponent;
-	UPROPERTY(VisibleDefaultsOnly)
-	UHealthComponent* HealthComponent;
 	UPROPERTY(VisibleDefaultsOnly)
 	URespawnComponent* RespawnComponent;
 	UPROPERTY(EditDefaultsOnly, Category = Projectile)

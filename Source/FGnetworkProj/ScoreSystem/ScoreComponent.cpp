@@ -48,7 +48,9 @@ void UScoreComponent::TickComponent( float DeltaTime, enum ELevelTick TickType, 
 {
 	Super::TickComponent( DeltaTime, TickType, ThisTickFunction );
 
-	GEngine->AddOnScreenDebugMessage( PlayerNetIndex, 0, FColor::Red, FString::Printf( TEXT( "%s score: %i" ), *Name, GetScore("kills") ));
+	int Kills = GetScore( "kills" );
+
+	GEngine->AddOnScreenDebugMessage( PlayerNetIndex, 0, FColor::Red, FString::Printf( TEXT( "%s score: %i" ), *Name, Kills ));
 }
 
 void UScoreComponent::SetScore(const FString key, const int value)
